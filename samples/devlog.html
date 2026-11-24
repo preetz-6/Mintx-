@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CI run #812 failed · payments-api (synthetic)</title><link rel="stylesheet" href="sample.css"></head>
+<body>
+<header><b>BuildBoard</b><span>payments-api · main</span><a href="./">All scenarios</a></header>
+<div class="banner">Synthetic test page. Every key and password below is fake.</div>
+<main>
+<section>
+  <h1>CI run #812 failed at “integration-tests”</h1>
+  <p class="muted">Commit 9f3c2e1b7a by Vikram Nair · triggered 2026-11-20T10:14:03Z · runner ubuntu-24.04 · Python 3.12.4</p>
+  <h2>Environment dump</h2>
+<pre>AWS_ACCESS_KEY_ID=AKIA4HQ7Z2X9WBN3KD5R
+GITHUB_TOKEN=ghp_x8K2mQ9vL4tR7wN1pZ6yB3cF5hJ0dS2aE8uG
+DATABASE_URL=postgres://admin:S3cretPass!2026@10.0.4.12:5432/payments
+SESSION_JWT=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyLTQ0MiIsInJvbGUiOiJhZG1pbiJ9.k3Xz9Qw2LmPq7RtYv8NcB1sDfGh4JkLz
+REQUEST_ID=3f6c1a2e-8b4d-4c2e-9f1a-7d5e6b8c9a0b
+FEATURE_FLAGS=checkout_v2,fast_refunds</pre>
+  <h2>Failure</h2>
+<pre>tests/integration/test_refunds.py::test_partial_refund FAILED
+E   psycopg.OperationalError: connection to server at "10.0.4.12", port 5432 failed: password authentication failed for user "admin"
+E   Retried 3 times (backoff 2s, 4s, 8s)
+requirements: requests==2.31.0, psycopg==3.2.1, fastapi==0.115.4</pre>
+  <h2>Comment</h2>
+  <p>Vikram Nair: I think the password rotated last night. Can someone with vault access check? Ping me at vikram.nair@example.com.</p>
+</section>
+</main>
+</body></html>

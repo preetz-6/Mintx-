@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mintx Assistant</title>
+<link rel="stylesheet" href="panel.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><img src="icons/32.png" alt="" width="22" height="22"><span>Mintx</span></div>
+  <span id="status" class="pill" title="Server status">connecting…</span>
+  <button id="newChat" class="icon" title="New chat (clears the local vault)" aria-label="New chat">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button id="openSettings" class="icon" title="Privacy settings" aria-label="Privacy settings">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+</header>
+
+<main id="log" aria-live="polite">
+  <section id="welcome" class="welcome">
+    <h1>Ask about this page</h1>
+    <p>Mintx reads the page only when you send a message. Names, contact details, IDs and secrets are detected and replaced on your device before anything reaches the model, then restored in the answer.</p>
+    <div class="suggest">
+      <button data-q="Summarize this page in a few bullet points.">Summarize this page</button>
+      <button data-q="Draft a short, polite reply to the latest message on this page.">Draft a reply</button>
+      <button data-q="What personal information about people appears on this page?">What personal data is here?</button>
+    </div>
+  </section>
+</main>
+
+<form id="composer" autocomplete="off">
+  <div class="toggles">
+    <label><input type="checkbox" id="usePage" checked> Use page</label>
+    <label><input type="checkbox" id="review"> Review before sending</label>
+    <span id="policyLabel" class="muted"></span>
+  </div>
+  <div class="box">
+    <textarea id="input" rows="2" placeholder="Ask anything about this page…  (Enter to send)" maxlength="4000"></textarea>
+    <button id="send" class="send" aria-label="Send"><svg viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2-7z"/></svg></button>
+  </div>
+</form>
+
+<dialog id="settings">
+  <form method="dialog">
+    <h2>Privacy layer</h2>
+    <fieldset>
+      <legend>Detection layers</legend>
+      <div id="layerList"></div>
+    </fieldset>
+    <fieldset>
+      <legend>Sensitivity</legend>
+      <label class="row"><input type="radio" name="policy" value="strict"> <span><b>Strict</b> · mask at ≥ 35% confidence</span></label>
+      <label class="row"><input type="radio" name="policy" value="balanced"> <span><b>Balanced</b> · mask at ≥ 50%</span></label>
+      <label class="row"><input type="radio" name="policy" value="relaxed"> <span><b>Relaxed</b> · mask at ≥ 70%</span></label>
+    </fieldset>
+    <fieldset>
+      <legend>Replacement strategy <small>(applies to new chats)</small></legend>
+      <label class="row"><input type="radio" name="strategy" value="tag"> <span><b>Typed placeholders</b> · [PERSON_1], [EMAIL_1]</span></label>
+      <label class="row"><input type="radio" name="strategy" value="synthetic"> <span><b>Synthetic surrogates</b> · realistic fake names and contacts</span></label>
+    </fieldset>
+    <fieldset>
+      <legend>Page context</legend>
+      <label class="row"><span>Max characters sent</span> <input type="number" id="maxChars" min="1000" max="30000" step="500"></label>
+      <label class="row"><span>Server</span> <input type="url" id="server"></label>
+    </fieldset>
+    <menu><button value="close" class="primary">Done</button></menu>
+  </form>
+</dialog>
+
+<script src="vendor/compromise.js"></script>
+<script type="module" src="panel.js"></script>
+</body>
+</html>

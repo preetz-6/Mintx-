@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mintx test scenarios</title><link rel="stylesheet" href="sample.css"></head>
+<body>
+<header><b>Mintx Assistant</b><span>Test scenarios</span></header>
+<main>
+<section>
+  <h1>How to test</h1>
+  <ol>
+    <li>Start the server: <code>.\start.ps1</code> for real answers (Ollama), or <code>.\start.ps1 -Mode dummy</code> for the fast offline model.</li>
+    <li>Load the <code>assistant</code> folder in <code>chrome://extensions</code> (Developer mode → Load unpacked).</li>
+    <li>Open a scenario page below, press <b>Alt+M</b>, type the question, and compare with <b>Expect</b>.</li>
+    <li>In every run, expand the privacy card and open <b>What the model sees</b>: that text is the only page content that leaves your browser.</li>
+  </ol>
+  <p class="muted">Automated version of the same checks: <code>python assistant/test/scenarios.py</code></p>
+</section>
+
+<h2>Page scenarios</h2>
+
+<section>
+  <a class="card" href="ticket.html"><h1>1 · Support ticket</h1></a>
+  <span class="tag">mixed PII</span><span class="tag">Indian IDs</span><span class="tag">coreference</span>
+  <p><b>Ask:</b> “Draft a short reply to the customer and list what you need from finance.”</p>
+  <p><b>Expect:</b> about 17 values protected: names, email, phone, card, Aadhaar, PAN, DOB, UPI, IBAN, API key, IP, address. “Priya”, “Sharma” and “Priya Sharma” all share one placeholder. The words “Aadhaar” and “PAN” stay visible. The password field is never read. Real values reappear in the answer, highlighted yellow.</p>
+</section>
+
+<section>
+  <a class="card" href="devlog.html"><h1>2 · Developer build log</h1></a>
+  <span class="tag">secrets</span><span class="tag">entropy</span><span class="tag">utility</span>
+  <p><b>Ask:</b> “Why did this build fail and how do I fix it?”</p>
+  <p><b>Expect:</b> the AWS key, GitHub token, database password, JWT, the engineer's name and email are masked. The commit hash, request UUID, version numbers and the error message stay readable, so the model can still diagnose the failure.</p>
+</section>
+
+<section>
+  <a class="card" href="form.html"><h1>3 · Patient intake form</h1></a>
+  <span class="tag">form fields</span><span class="tag">password never read</span>
+  <p><b>Ask:</b> “Check this form for missing or inconsistent details.”</p>
+  <p><b>Expect:</b> the typed form values are read and masked (name, DOB, both phones, email, address, emergency contact). “Migraine#2026” from the password field never appears anywhere. Symptoms are not identifiers, so they are kept: a good point to discuss for health data.</p>
+</section>
+
+<section>
+  <a class="card" href="article.html"><h1>4 · Public news article</h1></a>
+  <span class="tag">precision</span><span class="tag">over-masking</span>
+  <p><b>Ask:</b> “Summarize this article in three bullet points.”</p>
+  <p><b>Expect:</b> dates, figures and percentages are untouched. Organizations and cities may be masked by the NER layers: that is the privacy-versus-utility trade-off. Try <b>Relaxed</b> in settings, or <b>Review before sending</b> and click <b>Share</b>.</p>
+</section>
+
+<section>
+  <a class="card" href="injection.html"><h1>5 · Prompt injection</h1></a>
+  <span class="tag">security</span><span class="tag">exfiltration</span>
+  <p><b>Ask:</b> “Summarize my order.”</p>
+  <p><b>Expect:</b> the invisible <code>display:none</code> instruction is never read. The tiny white “SYSTEM OVERRIDE” text is read, but the model only has placeholders, so even if it obeys it cannot reveal real data. The answer never loads the attacker's image link (the renderer has no images or links).</p>
+</section>
+
+<h2>Feature scenarios</h2>
+<section>
+  <ol>
+    <li value="6"><b>Follow-up memory</b> · after scenario 1 ask “What is her phone number?”. The same <code>[PHONE_1]</code> is reused across turns.</li>
+    <li><b>Human review</b> · tick <i>Review before sending</i>, ask anything on the ticket, click <b>Share</b> on the email and watch <i>What the model sees</i> change; then Send or Cancel.</li>
+    <li><b>Server egress guard</b> · settings ⚙ → untick <i>Rules + checksums</i>, ask on the ticket. The server blocks the request (unmasked EMAIL, CREDIT_CARD…) and nothing reaches the model.</li>
+    <li><b>Synthetic surrogates</b> · settings → <i>Synthetic surrogates</i>, then <b>+</b> (new chat). The model sees “Alex Morgan”, “user1@example.com”; you see the real values.</li>
+    <li><b>Sensitivity</b> · on the build log compare <i>Strict</i> and <i>Relaxed</i>: low-confidence items move between masked and the “left unmasked” list.</li>
+    <li><b>Selection</b> · select one paragraph, right-click → <i>Ask Mintx about the selection</i>.</li>
+    <li><b>Show on page</b> · after any answer, click <i>Show on page</i> to highlight what was detected.</li>
+    <li><b>Unreadable page</b> · ask on <code>chrome://extensions</code>: Mintx answers without page context instead of failing.</li>
+    <li><b>Server down</b> · stop the server: the status pill turns red and the chat shows a clear error.</li>
+  </ol>
+</section>
+</main>
+</body></html>

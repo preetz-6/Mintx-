@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "minimum_chrome_version": "116",
+  "name": "Mintx Assistant",
+  "version": "2.0.0",
+  "description": "Chat about any page. Personal data is detected and pseudonymized on your device before anything reaches the model.",
+  "permissions": ["sidePanel", "storage", "scripting", "activeTab", "tabs", "contextMenus"],
+  "host_permissions": ["<all_urls>"],
+  "action": { "default_title": "Ask Mintx (Alt+M)", "default_icon": { "16": "icons/16.png", "32": "icons/32.png" } },
+  "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "commands": { "_execute_action": { "suggested_key": { "default": "Alt+M" }, "description": "Open the Mintx assistant" } },
+  "side_panel": { "default_path": "panel.html" },
+  "background": { "service_worker": "worker.js", "type": "module" },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  }
+}

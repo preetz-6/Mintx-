@@ -1,0 +1,6 @@
+fastapi>=0.115,<1
+pydantic>=2.8,<3
+uvicorn>=0.30,<1
+httpx>=0.27,<1
+# Only for the automated browser tests (assistant/test/scenarios.py):
+playwright>=1.50,<2

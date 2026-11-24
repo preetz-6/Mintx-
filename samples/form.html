@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New patient intake · Lakeview Clinic (synthetic)</title><link rel="stylesheet" href="sample.css"></head>
+<body>
+<header><b>Lakeview Clinic</b><span>Patient portal</span><a href="./">All scenarios</a></header>
+<div class="banner">Synthetic test page. The patient and all details are fictional.</div>
+<main>
+<section>
+  <h1>New patient intake</h1>
+  <p class="muted">Please review your details before your appointment on 3 December.</p>
+  <form onsubmit="return false">
+    <div class="grid">
+      <div><label for="name">Full name</label><input id="name" value="Ananya Krishnan"></div>
+      <div><label for="dob">Date of birth</label><input id="dob" value="07/03/1988"></div>
+      <div><label for="phone">Mobile number</label><input id="phone" type="tel" value="+91 90080 77665"></div>
+      <div><label for="email">Email</label><input id="email" type="email" value="ananya.krishnan@example.net"></div>
+    </div>
+    <label for="addr">Home address</label>
+    <input id="addr" value="17 Residency Road, Chennai 600028">
+    <div class="grid">
+      <div><label for="ec">Emergency contact</label><input id="ec" value="Karthik Krishnan"></div>
+      <div><label for="ecp">Emergency contact phone</label><input id="ecp" value="+91 90080 11223"></div>
+    </div>
+    <label for="symptoms">Reason for visit</label>
+    <textarea id="symptoms" rows="3">Recurring migraines for 3 weeks, worse in the morning. Currently taking 500 mg paracetamol twice daily.</textarea>
+    <label for="insurer">Insurance provider</label>
+    <select id="insurer"><option>Star Health</option><option selected>Niva Bupa</option></select>
+    <label for="pw">Create a portal password</label>
+    <input id="pw" type="password" value="Migraine#2026">
+    <label><input type="checkbox" checked style="width:auto"> I consent to the clinic's privacy policy</label>
+  </form>
+</section>
+</main>
+</body></html>

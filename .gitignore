@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Model weights downloaded by assistant/fetch_model.py (about 109 MB)
+assistant/models/
+
+# Original permit-portal demo, kept on this machine only
+legacy/
+
+# Local configuration and secrets
+.env
+.env.*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.log

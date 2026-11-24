@@ -1,0 +1,126 @@
+:root {
+  --bg: #f6f7f4; --surface: #ffffff; --ink: #15221f; --muted: #5d6b66; --line: #dfe5e1;
+  --accent: #17604f; --accent-ink: #ffffff; --accent-soft: #e3f1ec;
+  --user: #17604f; --user-ink: #ffffff;
+  --warn: #8a5a00; --warn-bg: #fff4d9; --bad: #a32d2d; --bad-bg: #fde8e8;
+  --mark: #fff0b8; --mark-ink: #4a3b00;
+  --s-rules: #2f6fdb; --s-secrets: #b5427a; --s-nlp: #8a6d00; --s-neural: #7b4fd6; --s-linking: #1f8a70; --s-propagation: #5d6b66;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101614; --surface: #18211e; --ink: #e5ece9; --muted: #9aa8a2; --line: #2b3733;
+    --accent: #4fbf9f; --accent-ink: #08201a; --accent-soft: #1d3a31;
+    --user: #2d7d68; --user-ink: #f2fffb;
+    --warn: #f3c46b; --warn-bg: #3a2f14; --bad: #ff9c9c; --bad-bg: #3d1c1c;
+    --mark: #5a4a12; --mark-ink: #fff1c2;
+    --s-rules: #7ea8ff; --s-secrets: #f08bbd; --s-nlp: #e3c55a; --s-neural: #b79cff; --s-linking: #5fd3b3; --s-propagation: #9aa8a2;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box }
+html, body { height: 100% }
+body { margin: 0; display: flex; flex-direction: column; background: var(--bg); color: var(--ink); font: 14px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif }
+button { font: inherit; cursor: pointer }
+svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round }
+
+.top { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); background: var(--surface) }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 16px; margin-right: auto }
+.pill { font-size: 12px; padding: 2px 9px; border-radius: 99px; background: var(--line); color: var(--muted); white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis }
+.pill.ok { background: var(--accent-soft); color: var(--accent) }
+.pill.bad { background: var(--bad-bg); color: var(--bad) }
+.icon { border: 0; background: transparent; color: var(--muted); padding: 6px; border-radius: 6px; display: grid }
+.icon:hover { background: var(--accent-soft); color: var(--accent) }
+
+#log { flex: 1; overflow-y: auto; padding: 14px 12px 8px; display: flex; flex-direction: column; gap: 10px }
+.welcome h1 { font-size: 20px; margin: 18px 0 6px }
+.welcome p { color: var(--muted); margin: 0 0 14px }
+.suggest { display: flex; flex-direction: column; gap: 6px }
+.suggest button { text-align: left; border: 1px solid var(--line); background: var(--surface); color: var(--ink); padding: 9px 12px; border-radius: 10px }
+.suggest button:hover { border-color: var(--accent); color: var(--accent) }
+
+.msg { max-width: 92% }
+.msg.user { align-self: flex-end }
+.msg.user .bubble { background: var(--user); color: var(--user-ink); border-radius: 14px 14px 4px 14px; padding: 8px 12px; white-space: pre-wrap; overflow-wrap: anywhere }
+.msg.bot { align-self: flex-start; width: 100% }
+.msg.bot .bubble { background: var(--surface); border: 1px solid var(--line); border-radius: 14px 14px 14px 4px; padding: 8px 12px; overflow-wrap: anywhere }
+.msg.error { align-self: stretch; background: var(--bad-bg); color: var(--bad); border-radius: 10px; padding: 8px 12px }
+.foot { font-size: 11px; color: var(--muted); margin: 3px 4px 0 }
+.md p { margin: 0 0 8px } .md p:last-child { margin-bottom: 0 }
+.md ul, .md ol { margin: 0 0 8px; padding-left: 20px }
+.md h4 { margin: 8px 0 4px; font-size: 14px }
+.md code { background: var(--accent-soft); padding: 0 4px; border-radius: 4px; font-size: 12.5px }
+.md pre { background: var(--bg); padding: 8px; border-radius: 8px; overflow-x: auto }
+mark.restored { background: var(--mark); color: var(--mark-ink); border-radius: 4px; padding: 0 3px; box-shadow: inset 0 -1px 0 rgba(0,0,0,.15) }
+.typing { display: inline-flex; gap: 4px; padding: 4px 0 }
+.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: blink 1s infinite }
+.typing i:nth-child(2) { animation-delay: .15s } .typing i:nth-child(3) { animation-delay: .3s }
+@keyframes blink { 0%, 80%, 100% { opacity: .25 } 40% { opacity: 1 } }
+
+/* Privacy card */
+.shield { background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; padding: 0 10px; font-size: 13px }
+.shield > summary { list-style: none; display: flex; align-items: center; gap: 8px; padding: 8px 0; cursor: pointer }
+.shield > summary::-webkit-details-marker { display: none }
+.shield-icon { width: 16px; height: 16px; flex: none; background: var(--accent); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z'/%3E%3C/svg%3E") center/contain no-repeat }
+.shield .meta { margin-left: auto; color: var(--muted); font-size: 12px }
+.pipeline { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 2px }
+.pipeline li { display: flex; align-items: center; gap: 8px; color: var(--muted) }
+.pipeline li small { margin-left: auto; font-variant-numeric: tabular-nums }
+.dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--line); flex: none }
+.pipeline li[data-state=running] { color: var(--ink) }
+.pipeline li[data-state=running] .dot { border-color: var(--accent); animation: blink 1s infinite }
+.pipeline li[data-state=done] { color: var(--ink) }
+.pipeline li[data-state=done] .dot { background: var(--accent); border-color: var(--accent) }
+.pipeline li[data-state=error] .dot { background: var(--bad); border-color: var(--bad) }
+.pipeline li[data-state=off] { opacity: .5; text-decoration: line-through }
+.notes p { margin: 4px 0; padding: 6px 8px; border-radius: 6px }
+.notes .warn { background: var(--warn-bg); color: var(--warn) }
+.notes .bad { background: var(--bad-bg); color: var(--bad) }
+.rows { display: grid; gap: 4px; margin: 4px 0 8px }
+.row { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "tok val keep" "src src conf"; gap: 3px 8px; padding: 5px 8px; border-radius: 8px; background: var(--bg); align-items: center }
+.row.kept { opacity: .6 } .row.kept .token { text-decoration: line-through }
+.token { grid-area: tok; font-size: 11.5px; background: var(--accent-soft); color: var(--accent); padding: 1px 5px; border-radius: 4px; white-space: nowrap }
+.value { grid-area: val; overflow-wrap: anywhere; font-weight: 500 }
+.value small { color: var(--muted); font-weight: 400 }
+.conf { grid-area: conf; display: flex; align-items: center; gap: 6px; justify-self: end }
+.bar { display: block; width: 56px; height: 4px; border-radius: 2px; background: var(--line); overflow: hidden }
+.bar i { display: block; height: 100%; background: var(--accent) }
+.conf em { width: 30px; text-align: right }
+.conf em { font-style: normal; font-size: 11px; color: var(--muted) }
+.srcs { grid-area: src; display: flex; flex-wrap: wrap; gap: 4px }
+.src { font-size: 10.5px; padding: 0 6px; border-radius: 99px; border: 1px solid currentColor }
+.src.rules { color: var(--s-rules) } .src.secrets { color: var(--s-secrets) } .src.nlp { color: var(--s-nlp) }
+.src.neural { color: var(--s-neural) } .src.linking { color: var(--s-linking) } .src.propagation { color: var(--s-propagation) }
+.keep { grid-area: keep; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 1px 8px; font-size: 12px }
+.low summary { color: var(--muted); cursor: pointer; margin-bottom: 4px }
+.low ul { margin: 0 0 8px; padding-left: 18px; color: var(--muted) }
+.actions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px }
+.actions button, .review .ghost { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 3px 10px; font-size: 12.5px }
+.actions button:hover { border-color: var(--accent); color: var(--accent) }
+.preview { white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11.5px; max-height: 260px; overflow-y: auto; background: var(--bg); padding: 8px; border-radius: 8px; margin: 0 0 8px }
+.review { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 8px 0 10px; border-top: 1px dashed var(--line) }
+.review span { flex: 1 1 100%; color: var(--muted) }
+.primary { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 6px; padding: 5px 14px; font-weight: 600 }
+.muted { color: var(--muted) }
+
+/* Composer */
+#composer { padding: 8px 12px 12px; border-top: 1px solid var(--line); background: var(--surface) }
+.toggles { display: flex; gap: 12px; align-items: center; font-size: 12px; margin-bottom: 6px; flex-wrap: wrap }
+.toggles label { display: flex; gap: 4px; align-items: center; cursor: pointer }
+.toggles .muted { margin-left: auto }
+.box { display: flex; gap: 6px; align-items: flex-end; border: 1px solid var(--line); border-radius: 12px; padding: 6px 6px 6px 10px; background: var(--bg) }
+.box:focus-within { border-color: var(--accent) }
+textarea { flex: 1; resize: none; border: 0; background: transparent; color: var(--ink); font: inherit; outline: none; max-height: 140px }
+.send { border: 0; background: var(--accent); color: var(--accent-ink); border-radius: 9px; padding: 7px; display: grid }
+.send:disabled { opacity: .5; cursor: wait }
+
+/* Settings */
+dialog { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); width: min(420px, calc(100% - 24px)); padding: 16px }
+dialog::backdrop { background: rgba(0,0,0,.35) }
+dialog h2 { margin: 0 0 8px; font-size: 17px }
+fieldset { border: 1px solid var(--line); border-radius: 8px; margin: 0 0 10px; padding: 8px 10px }
+legend { font-weight: 600; font-size: 12px; color: var(--muted); padding: 0 4px }
+.row small { color: var(--muted) }
+fieldset .row { display: flex; gap: 8px; align-items: flex-start; padding: 3px 0; background: none; grid-template: none }
+fieldset .row input[type=number], fieldset .row input[type=url] { margin-left: auto; width: 55%; font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink) }
+menu { display: flex; justify-content: flex-end; margin: 0; padding: 0 }

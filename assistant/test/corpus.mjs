@@ -1,0 +1,28 @@
+// Synthetic labelled corpus. Every value is fictional; IDs are checksum-valid test numbers.
+// Each sample lists the gold values that must be masked, and decoys that must NOT be.
+export const CORPUS = [
+  { text: "Hi team, Priya Sharma from Infosys will join the call. Reach her at priya.sharma@example.org or +91 98450 12345.",
+    gold: [["Priya Sharma", "PERSON"], ["Infosys", "ORGANIZATION"], ["priya.sharma@example.org", "EMAIL"], ["+91 98450 12345", "PHONE"]] },
+  { text: "Customer: Rahul Verma\nAadhaar: 2345 6789 0124\nPAN: ABCPE1234F\nDOB: 14/08/1992\nCity: Bengaluru",
+    gold: [["Rahul Verma", "PERSON"], ["2345 6789 0124", "AADHAAR"], ["ABCPE1234F", "PAN"], ["14/08/1992", "DATE_OF_BIRTH"], ["Bengaluru", "LOCATION"]] },
+  { text: "Please charge card 4111 1111 1111 1111 (exp 09/28). Invoice INV-2024-0042 totals 1250 USD.",
+    gold: [["4111 1111 1111 1111", "CREDIT_CARD"]], decoys: ["INV-2024-0042", "1250"] },
+  { text: "Deploy failed. Set OPENAI_API_KEY=sk-proj-Q7vT2mX9pL4rS8wK1nB6yH3dF0gJ5cZa and retry. Commit 3f2a9c1 is fine.",
+    gold: [["sk-proj-Q7vT2mX9pL4rS8wK1nB6yH3dF0gJ5cZa", "SECRET"]], decoys: ["3f2a9c1"] },
+  { text: "Wire the refund to IBAN GB82 WEST 1234 5698 7654 32 for Emma Thompson, London.",
+    gold: [["GB82 WEST 1234 5698 7654 32", "IBAN"], ["Emma Thompson", "PERSON"], ["London", "LOCATION"]] },
+  { text: "Pay me on UPI at ananya.k@okaxis — thanks! The meeting is on 12 March 2025 at 3 pm.",
+    gold: [["ananya.k@okaxis", "UPI_ID"]], decoys: ["12 March 2025"] },
+  { text: "Suspicious login from 203.0.113.42 on account of Michael Chen. Password: Tr0ub4dor&3 was reset.",
+    gold: [["203.0.113.42", "IP_ADDRESS"], ["Michael Chen", "PERSON"], ["Tr0ub4dor&3", "SECRET"]] },
+  { text: "Ship to 221B Baker Street, London. Contact phone (415) 555-0132. Order total 3 items.",
+    gold: [["221B Baker Street", "ADDRESS"], ["London", "LOCATION"], ["(415) 555-0132", "PHONE"]] },
+  { text: "Dear Arjun, your PIN code 560034 is linked to Koramangala branch. Aadhaar 4918 1234 5679 verified.",
+    gold: [["Arjun", "PERSON"], ["560034", "POSTAL_CODE"], ["Koramangala", "LOCATION"], ["4918 1234 5679", "AADHAAR"]] },
+  { text: "The quarterly report shows revenue grew 12% to 4.5 million. Version 2.3.1.4 ships Monday.",
+    gold: [], decoys: ["2.3.1.4", "4.5"] },
+  { text: "Token: ghp_a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8 belongs to Sofia Rossi at Globex Corporation.",
+    gold: [["ghp_a1B2c3D4e5F6g7H8i9J0k1L2m3N4o5P6q7R8", "SECRET"], ["Sofia Rossi", "PERSON"], ["Globex Corporation", "ORGANIZATION"]] },
+  { text: "SSN 123-45-6789 belongs to David Miller of Austin, Texas. Ticket #45-22-1190 is closed.",
+    gold: [["123-45-6789", "SSN"], ["David Miller", "PERSON"], ["Austin", "LOCATION"], ["Texas", "LOCATION"]] },
+];
