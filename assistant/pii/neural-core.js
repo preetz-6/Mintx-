@@ -1,7 +1,17 @@
 // Shared helpers for Layer 4 (transformer NER). Pure functions so they can be unit-tested.
 
-export const NER_MODEL = "Xenova/bert-base-NER";
-const TYPES = { PER: "PERSON", LOC: "LOCATION", ORG: "ORGANIZATION" };
+// Selectable models. Any Hugging Face repo in transformers.js layout also works by id.
+export const NER_MODELS = {
+  generic: { id: "Xenova/bert-base-NER", name: "Generic NER (BERT, CoNLL-2003)" },
+  mintx: { id: "Preetm-666/mintx-pii-distilbert", name: "Mintx PII (fine-tuned)" },
+};
+export const NER_MODEL = NER_MODELS.generic.id;
+
+// CoNLL labels map onto Mintx types; the fine-tuned model already emits Mintx types.
+const CONLL = { PER: "PERSON", LOC: "LOCATION", ORG: "ORGANIZATION" };
+export const MINTX_TYPES = new Set(["PERSON", "EMAIL", "PHONE", "ADDRESS", "LOCATION", "ORGANIZATION", "DATE_OF_BIRTH",
+  "GOV_ID", "CREDIT_CARD", "BANK_ACCOUNT", "UPI_ID", "IP_ADDRESS", "SECRET"]);
+const typeOf = label => CONLL[label] || (MINTX_TYPES.has(label) ? label : null);   // MISC and unknown → ignored
 
 // BERT reads at most 512 sub-word tokens, so long pages are split at sentence or line
 // boundaries into chunks of roughly 250 tokens.
@@ -26,12 +36,14 @@ const escape = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // The pipeline returns one label per sub-word token (B-PER, I-PER, ##-continuations) without
 // character offsets. Merge adjacent tokens into entities, then locate each entity in the
 // source text by matching its pieces with optional whitespace between them.
-export function aggregate(text, tokens, offset = 0) {
+export function aggregate(text, tokens, offset = 0, model = "BERT") {
   const groups = [];
   let cur = null;
   for (const t of tokens) {
-    const [bio, label] = t.entity.split("-");
-    const type = TYPES[label];
+    const dash = t.entity.indexOf("-");
+    const bio = dash > 0 ? t.entity.slice(0, dash) : "B";
+    const label = dash > 0 ? t.entity.slice(dash + 1) : t.entity;
+    const type = typeOf(label);
     const sub = t.word.startsWith("##");
     const continues = cur && t.index === cur.last + 1 && (sub || (bio === "I" && cur.label === label));
     if (continues) {
@@ -56,7 +68,7 @@ export function aggregate(text, tokens, offset = 0) {
     const score = g.scores.reduce((a, b) => a + b, 0) / g.scores.length;
     if (m[0].length < 2) continue;
     out.push({ start: offset + m.index, end: offset + cursor, type: g.type, score: Math.min(0.97, score),
-      source: "neural", reasons: [`BERT ${g.label} p=${score.toFixed(2)}`] });
+      source: "neural", reasons: [`${model} ${g.label} p=${score.toFixed(2)}`] });
   }
   return out;
 }

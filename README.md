@@ -65,7 +65,7 @@ sh start.sh dummy    # offline replies
 
 **3. Use it.** Open any web page, press **Alt+M** (or click the shield icon) and ask a question. The status pill at the top shows the model name in green when the server is reachable.
 
-On first use the BERT model (about 109 MB) downloads from Hugging Face and is cached. To prepare an offline demo, run `python assistant/fetch_model.py` once. With a CPU-only local 7B model, expect answers to take tens of seconds; the privacy card fills in immediately.
+On first use the fine-tuned PII model (66 MB) downloads from Hugging Face and is cached. To prepare an offline demo, run `python assistant/fetch_model.py` once. To compare with the generic model, choose **Generic NER** under settings ⚙ → Transformer model. With a CPU-only local 7B model, expect answers to take tens of seconds; the privacy card fills in immediately.
 
 ## Try the test scenarios
 
@@ -96,6 +96,7 @@ In every run, expand the privacy card and click **What the model sees**. That te
 python -m playwright install chromium
 node assistant/test/evaluate.mjs        # detection accuracy per layer (rules, secrets, NLP)
 python assistant/test/scenarios.py      # all 12 scenarios end to end, real extension in Chromium
+python assistant/test/system_eval.py    # whole engine on the realistic set: rules vs + generic BERT vs + fine-tuned
 ```
 
 `scenarios.py` starts its own dummy-mode server on port 8771, so it doesn't need Ollama or a free port 8765. It currently passes 73 of 73 checks. Trade-offs that are not pass/fail, such as how many organizations were masked, are printed as `NOTE` lines.
@@ -104,17 +105,60 @@ python assistant/test/scenarios.py      # all 12 scenarios end to end, real exte
 
 | Stage | Technique | Type | Code |
 | --- | --- | --- | --- |
-| Transformer NER | `bert-base-NER` fine-tuned on CoNLL-2003, int8-quantized ONNX, run by transformers.js and WebAssembly in a Web Worker. Finds people, organizations and places that rules miss. | **Learned model** | `assistant/pii/ner-worker.js` |
+| Transformer NER | **Our fine-tuned model** [`Preetm-666/mintx-pii-distilbert`](https://huggingface.co/Preetm-666/mintx-pii-distilbert): DistilBERT trained on 26k labelled examples to tag all 13 PII types and leave public names visible ([how it was built](#fine-tuned-pii-model)). The generic `bert-base-NER` (CoNLL-2003) is still available in settings. Both are int8 ONNX models run by transformers.js and WebAssembly in a Web Worker. | **Learned model, trained by us** | `assistant/pii/ner-worker.js`, `ml/` |
 | Answering | Local LLM (default `qwen2.5:7b` via Ollama), instructed to keep placeholders verbatim and to treat page text as untrusted | **Learned model** | `chat.py` |
 | Rules + checksums | Regex candidates confirmed by Luhn (cards), Verhoeff (Aadhaar) and ISO 13616 mod-97 (IBAN). Context words ("DOB", "phone") raise confidence, as in Microsoft Presidio. Structural cues: `Customer: …`, `Name <email>`. | Symbolic | `assistant/pii/patterns.js` |
 | Secrets + entropy | Signatures for OpenAI, GitHub, AWS, Stripe, Slack, JWT and private keys; passwords in connection URLs and `password: …` assignments. Shannon entropy in bits per character catches unknown keys. | Statistical | `assistant/pii/secrets.js` |
 | Linguistic NER | Compromise lexicon and part-of-speech rules. Fast, with no download. | Symbolic NLP | `assistant/pii/nlp.js` |
-| Ensemble fusion | Overlapping candidates are clustered. Each type's evidence is combined with noisy-OR, 1 − Π(1 − pᵢ), so independent detectors that agree reinforce each other. Confident specific types beat generic NER labels. A domain stoplist keeps words like "Aadhaar" from being masked. | Probabilistic | `assistant/pii/engine.js` |
+| Ensemble fusion | Overlapping candidates are clustered. Evidence is pooled per type family (the rules' `AADHAAR` and the model's `GOV_ID` vote together) and combined with noisy-OR, 1 − Π(1 − pᵢ), so independent detectors that agree reinforce each other. Confident specific types beat generic NER labels. A domain stoplist keeps words like "Aadhaar" from being masked. | Probabilistic | `assistant/pii/engine.js` |
 | Entity resolution | Coreference ("Priya" → "Priya Sharma"), email-to-name inference (`vikram.nair@…` → "Vikram Nair") and propagation, which masks every repeat of a detected value | Heuristic | `assistant/pii/engine.js` |
 | Policy | Confidence threshold: strict 0.35, balanced 0.5, relaxed 0.7. Each layer can be switched off. Candidates below the threshold are listed, not hidden. | | settings ⚙ |
 | Pseudonymization | Reversible and consistent across a conversation: typed tags (`[EMAIL_1]`) or synthetic surrogates (`Alex Morgan`, `user1@example.com`) | | `assistant/pii/vault.js` |
 | Human in the loop | **Review before sending** shows the exact payload. **Share** reveals a value deliberately. | | `assistant/panel.js` |
 | Defense in depth | The server independently re-scans every request and rejects unmasked identifiers unless the user approved them (sent as SHA-256 hashes). No request content is logged. | | `chat.py` |
+
+## Fine-tuned PII model
+
+The generic NER model was built for news: it tags *Google* and *USA* (correct for news, wrong for privacy) and knows nothing about Aadhaar, UPI or API keys. So we trained our own.
+
+1. **Dataset** (`ml/data/`, [Hugging Face](https://huggingface.co/datasets/Preetm-666/mintx-pii)). 33k examples labelled to a written [policy](ml/data/labeling_policy.md):
+   - a template generator with checksum-valid Indian and global identifiers and public-entity "keep" examples
+   - a sample of *OpenPII 1.5M*, relabelled by rule (weak supervision)
+   - 61 hand-checked realistic texts, used only for testing
+2. **Training** ([`ml/train_ner.ipynb`](ml/train_ner.ipynb), Kaggle T4, 22 min). `distilbert-base-cased` fine-tuned for BIO token classification (27 tags), 3 epochs, rare labels oversampled ×4.
+3. **Deployment.** Exported to ONNX, quantized to int8 (261 → 66 MB), and published to the Hub in transformers.js layout. The extension downloads it once and runs it in the browser.
+
+**Model vs the generic baseline** (character-span evaluation; *privacy recall* = share of personal values fully covered):
+
+| Test set | Model | Exact F1 | Privacy recall | Over-masking | Public names kept |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Held-out templates (1,885 values) | generic BERT | 0.278 | 0.553 | 0.205 | 0.041 |
+| | **fine-tuned** | **0.893** | **0.993** | **0.039** | **0.851** |
+| ai4privacy validation (12,666 values) | generic BERT | 0.070 | 0.161 | 0.100 | 0.133 |
+| | **fine-tuned** | **0.986** | **0.995** | **0.006** | **0.976** |
+| Realistic, hand-checked (98 values) | generic BERT | 0.190 | 0.500 | 0.355 | 0.212 |
+| | **fine-tuned** | **0.715** | **0.867** | **0.147** | **0.885** |
+
+**Whole system in the browser** (all layers + fusion, int8 models, realistic set; `python assistant/test/system_eval.py`):
+
+| Configuration | Privacy recall | Over-masking | Public names kept | Typed F1 |
+| --- | ---: | ---: | ---: | ---: |
+| Rules + secrets + linguistic NER | 0.439 | 0.043 | 1.000 | 0.593 |
+| + generic BERT | 0.786 | 0.331 | 0.288 | 0.658 |
+| **+ fine-tuned model** | **0.847** | **0.082** | **0.942** | **0.837** |
+| Fine-tuned model alone | 0.765 | 0.083 | 0.942 | 0.784 |
+
+The fine-tuned model is better on every measure and faster (133 vs 220 ms per text). The rules still add value on top of it: privacy recall rises from 0.765 to 0.847 because checksums and patterns catch what the model splits or mislabels.
+
+**Quantization cost.** int8 matched fp32 on the held-out templates (exact F1 0.903 vs 0.893). On the 98-value realistic set, privacy recall fell from 0.867 to 0.806, about 6 values. It runs about 2× faster on CPU and is 4× smaller.
+
+<p align="center"><img src="ml/results/mintx-pii-distilbert/training_curves.png" width="85%" alt="Training and validation curves"></p>
+
+**Error analysis** ([full list](ml/results/mintx-pii-distilbert/realistic_errors.txt)). Most errors trace back to the training data, which makes them good targets for the next round:
+- **Capitalized first words become PERSON** ("Hiring:", "Dear Parent", "Error 403"): the chat templates put names at the start of lines.
+- **All-caps names become GOV_ID** ("MOHAMMED IRFAN SHAIKH"): ai4privacy IDs are random capital letters.
+- **Cities are the weakest label** (F1 0.66 on held-out templates): often missed or confused with organizations.
+- **Public names in a new context** ("Applied to Infosys, TCS and Wipro", "Sundar Pichai") were still masked. The keep examples come from too few templates.
 
 ## Evaluation
 
@@ -155,7 +199,11 @@ This is a small synthetic benchmark. It shows how the layers interact; it does n
 │   ├── test/                   corpus, metrics, scenario runner
 │   ├── vendor/                 bundled libraries (no remote code at runtime)
 │   ├── icons/
-│   └── fetch_model.py          optional: download BERT weights for offline use
+│   └── fetch_model.py          optional: download the transformer models for offline use
+├── ml/                         dataset, training notebook, results (see ml/README.md)
+│   ├── data/                   generator, relabelling, labelling policy, realistic test set
+│   ├── train_ner.ipynb         fine-tuning → evaluation → ONNX/int8 → Hugging Face
+│   └── results/                metrics, curves, confusion matrix, error list
 ├── samples/                    synthetic test pages and scenario hub
 ├── server.py                   FastAPI app
 ├── chat.py                     /chat endpoint, egress guard, LLM streaming
@@ -192,3 +240,5 @@ All are bundled in `assistant/vendor/`; no code is loaded remotely.
 | [Transformers.js](https://github.com/huggingface/transformers.js) 3.8.1 | Apache-2.0 | Runs the BERT model |
 | [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) | MIT | WebAssembly inference (included in the transformers.js bundle) |
 | [`Xenova/bert-base-NER`](https://huggingface.co/Xenova/bert-base-NER) | MIT | ONNX conversion of `dslim/bert-base-NER`, downloaded at runtime |
+| [`distilbert-base-cased`](https://huggingface.co/distilbert/distilbert-base-cased) | Apache-2.0 | Base model for our fine-tuned PII model |
+| [OpenPII 1.5M](https://huggingface.co/datasets/ai4privacy/pii-masking-openpii-1.5m), Ai4Privacy / Ai Suisse SA | CC-BY-4.0 | Part of the training data, relabelled |

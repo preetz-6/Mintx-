@@ -22,3 +22,9 @@ desktop.ini
 .vscode/
 .idea/
 *.log
+
+# ML dataset: rebuilt by ml/data/fetch_ai4privacy.py + ml/data/build.py
+ml/data/raw/
+ml/data/processed/
+# Local training outputs (smoke tests, checkpoints)
+ml/outputs/

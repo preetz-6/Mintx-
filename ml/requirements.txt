@@ -1,0 +1,3 @@
+# Dataset building (step 1)
+faker>=30,<40
+httpx>=0.27,<1

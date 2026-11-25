@@ -20,12 +20,12 @@ function ensure() {
   return worker;
 }
 
-export function detectNeural(text, progress) {
+export function detectNeural(text, progress, model) {
   if (!text.trim()) return Promise.resolve([]);
   onProgress = progress || (() => {});
   const id = ++seq;
   return new Promise((resolve, reject) => {
     pending.set(id, { resolve, reject });
-    ensure().postMessage({ id, text });
+    ensure().postMessage({ id, text, model });
   });
 }

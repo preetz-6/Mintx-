@@ -48,6 +48,12 @@
       <div id="layerList"></div>
     </fieldset>
     <fieldset>
+      <legend>Transformer model</legend>
+      <label class="row"><input type="radio" name="nerChoice" value="generic"> <span><b>Generic NER</b> · bert-base-NER (CoNLL-2003): names, places, organizations</span></label>
+      <label class="row"><input type="radio" name="nerChoice" value="custom"> <span><b>Mintx PII (fine-tuned)</b> · all 13 PII types, keeps public names visible</span></label>
+      <label class="row"><span>Model id</span> <input type="text" id="nerModelId" placeholder="username/mintx-pii-distilbert" spellcheck="false"></label>
+    </fieldset>
+    <fieldset>
       <legend>Sensitivity</legend>
       <label class="row"><input type="radio" name="policy" value="strict"> <span><b>Strict</b> · mask at ≥ 35% confidence</span></label>
       <label class="row"><input type="radio" name="policy" value="balanced"> <span><b>Balanced</b> · mask at ≥ 50%</span></label>

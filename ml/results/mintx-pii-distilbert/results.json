@@ -1,0 +1,341 @@
+{
+  "run": "mintx-pii-distilbert",
+  "base_model": "distilbert-base-cased",
+  "epochs": 3,
+  "train_minutes": 21.8,
+  "results": {
+    "mintx-pii-distilbert | test_synthetic": {
+      "exact_f1": 0.8931735278791036,
+      "partial_f1": 0.9478895257946848,
+      "privacy_recall": 0.9925729442970822,
+      "over_mask_rate": 0.03891449052739376,
+      "keep_respected": 0.8512820512820513,
+      "gold_spans": 1885,
+      "ms_per_example": 1.705804971548227
+    },
+    "mintx-pii-distilbert | test_ai4privacy": {
+      "exact_f1": 0.9855814686416641,
+      "partial_f1": 0.9915694925937598,
+      "privacy_recall": 0.9951050055266066,
+      "over_mask_rate": 0.005504010064475547,
+      "keep_respected": 0.9759036144578314,
+      "gold_spans": 12666,
+      "ms_per_example": 8.976650873819986
+    },
+    "mintx-pii-distilbert | test_realistic": {
+      "exact_f1": 0.714975845410628,
+      "partial_f1": 0.8019323671497585,
+      "privacy_recall": 0.8673469387755102,
+      "over_mask_rate": 0.14678899082568808,
+      "keep_respected": 0.8846153846153846,
+      "gold_spans": 98,
+      "ms_per_example": 1.8396963838671074
+    },
+    "baseline: bert-base-NER (CoNLL) | test_synthetic": {
+      "exact_f1": 0.27835497835497836,
+      "partial_f1": 0.48268398268398266,
+      "privacy_recall": 0.553315649867374,
+      "over_mask_rate": 0.20475319926873858,
+      "keep_respected": 0.041025641025641026,
+      "gold_spans": 1885
+    },
+    "baseline: bert-base-NER (CoNLL) | test_ai4privacy": {
+      "exact_f1": 0.07004247522278671,
+      "partial_f1": 0.29058049471141834,
+      "privacy_recall": 0.16114006000315806,
+      "over_mask_rate": 0.100105745505816,
+      "keep_respected": 0.13253012048192772,
+      "gold_spans": 12666
+    },
+    "baseline: bert-base-NER (CoNLL) | test_realistic": {
+      "exact_f1": 0.18972332015810275,
+      "partial_f1": 0.4268774703557312,
+      "privacy_recall": 0.5,
+      "over_mask_rate": 0.3548387096774194,
+      "keep_respected": 0.21153846153846154,
+      "gold_spans": 98
+    }
+  },
+  "quantization": {
+    "pytorch fp32 | test_synthetic": {
+      "exact_f1": 0.8931735278791036,
+      "partial_f1": 0.9478895257946848,
+      "privacy_recall": 0.9925729442970822,
+      "over_mask_rate": 0.03891449052739376,
+      "keep_respected": 0.8512820512820513,
+      "gold_spans": 1885,
+      "cpu_ms_per_example": 36.97365210606502
+    },
+    "pytorch fp32 | test_realistic": {
+      "exact_f1": 0.714975845410628,
+      "partial_f1": 0.8019323671497585,
+      "privacy_recall": 0.8673469387755102,
+      "over_mask_rate": 0.14678899082568808,
+      "keep_respected": 0.8846153846153846,
+      "gold_spans": 98,
+      "cpu_ms_per_example": 34.38419592185099
+    },
+    "onnx fp32 | test_synthetic": {
+      "exact_f1": 0.8931735278791036,
+      "partial_f1": 0.9478895257946848,
+      "privacy_recall": 0.9925729442970822,
+      "over_mask_rate": 0.03891449052739376,
+      "keep_respected": 0.8512820512820513,
+      "gold_spans": 1885,
+      "cpu_ms_per_example": 21.621336203355057
+    },
+    "onnx fp32 | test_realistic": {
+      "exact_f1": 0.714975845410628,
+      "partial_f1": 0.8019323671497585,
+      "privacy_recall": 0.8673469387755102,
+      "over_mask_rate": 0.14678899082568808,
+      "keep_respected": 0.8846153846153846,
+      "gold_spans": 98,
+      "cpu_ms_per_example": 19.92837327425597
+    },
+    "onnx int8 | test_synthetic": {
+      "exact_f1": 0.9027705175117616,
+      "partial_f1": 0.9451123889179299,
+      "privacy_recall": 0.9851458885941644,
+      "over_mask_rate": 0.02627511591962906,
+      "keep_respected": 0.8871794871794871,
+      "gold_spans": 1885,
+      "cpu_ms_per_example": 19.111868418180027
+    },
+    "onnx int8 | test_realistic": {
+      "exact_f1": 0.6666666666666666,
+      "partial_f1": 0.7777777777777778,
+      "privacy_recall": 0.8061224489795918,
+      "over_mask_rate": 0.09,
+      "keep_respected": 0.9423076923076923,
+      "gold_spans": 98,
+      "cpu_ms_per_example": 16.771218815787893
+    }
+  },
+  "per_label": [
+    {
+      "test set": "test_synthetic",
+      "label": "ADDRESS",
+      "precision": 0.684,
+      "recall": 1.0,
+      "f1": 0.812,
+      "support": 130
+    },
+    {
+      "test set": "test_synthetic",
+      "label": "DATE_OF_BIRTH",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 130
+    },
+    {
+      "test set": "test_synthetic",
+      "label": "GOV_ID",
+      "precision": 0.942,
+      "recall": 1.0,
+      "f1": 0.97,
+      "support": 65
+    },
+    {
+      "test set": "test_synthetic",
+      "label": "LOCATION",
+      "precision": 0.659,
+      "recall": 0.654,
+      "f1": 0.656,
+      "support": 130
+    },
+    {
+      "test set": "test_synthetic",
+      "label": "ORGANIZATION",
+      "precision": 0.915,
+      "recall": 0.933,
+      "f1": 0.924,
+      "support": 195
+    },
+    {
+      "test set": "test_synthetic",
+      "label": "PERSON",
+      "precision": 0.99,
+      "recall": 0.996,
+      "f1": 0.993,
+      "support": 910
+    },
+    {
+      "test set": "test_synthetic",
+      "label": "PHONE",
+      "precision": 1.0,
+      "recall": 0.988,
+      "f1": 0.994,
+      "support": 325
+    },
+    {
+      "test set": "test_realistic",
+      "label": "ADDRESS",
+      "precision": 0.5,
+      "recall": 1.0,
+      "f1": 0.667,
+      "support": 3
+    },
+    {
+      "test set": "test_realistic",
+      "label": "BANK_ACCOUNT",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 2
+    },
+    {
+      "test set": "test_realistic",
+      "label": "DATE_OF_BIRTH",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 2
+    },
+    {
+      "test set": "test_realistic",
+      "label": "EMAIL",
+      "precision": 0.8,
+      "recall": 1.0,
+      "f1": 0.889,
+      "support": 4
+    },
+    {
+      "test set": "test_realistic",
+      "label": "GOV_ID",
+      "precision": 0.462,
+      "recall": 1.0,
+      "f1": 0.632,
+      "support": 6
+    },
+    {
+      "test set": "test_realistic",
+      "label": "IP_ADDRESS",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 3
+    },
+    {
+      "test set": "test_realistic",
+      "label": "LOCATION",
+      "precision": 0.8,
+      "recall": 0.364,
+      "f1": 0.5,
+      "support": 11
+    },
+    {
+      "test set": "test_realistic",
+      "label": "ORGANIZATION",
+      "precision": 0.467,
+      "recall": 0.778,
+      "f1": 0.583,
+      "support": 9
+    },
+    {
+      "test set": "test_realistic",
+      "label": "PERSON",
+      "precision": 0.86,
+      "recall": 0.881,
+      "f1": 0.871,
+      "support": 42
+    },
+    {
+      "test set": "test_realistic",
+      "label": "PHONE",
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1": 0.947,
+      "support": 10
+    },
+    {
+      "test set": "test_realistic",
+      "label": "SECRET",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 4
+    },
+    {
+      "test set": "test_realistic",
+      "label": "UPI_ID",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 2
+    },
+    {
+      "test set": "test_ai4privacy",
+      "label": "ADDRESS",
+      "precision": 0.976,
+      "recall": 0.989,
+      "f1": 0.982,
+      "support": 1813
+    },
+    {
+      "test set": "test_ai4privacy",
+      "label": "CREDIT_CARD",
+      "precision": 0.988,
+      "recall": 0.999,
+      "f1": 0.993,
+      "support": 684
+    },
+    {
+      "test set": "test_ai4privacy",
+      "label": "DATE_OF_BIRTH",
+      "precision": 0.989,
+      "recall": 1.0,
+      "f1": 0.995,
+      "support": 467
+    },
+    {
+      "test set": "test_ai4privacy",
+      "label": "EMAIL",
+      "precision": 0.996,
+      "recall": 1.0,
+      "f1": 0.998,
+      "support": 1690
+    },
+    {
+      "test set": "test_ai4privacy",
+      "label": "GOV_ID",
+      "precision": 0.996,
+      "recall": 0.994,
+      "f1": 0.995,
+      "support": 3042
+    },
+    {
+      "test set": "test_ai4privacy",
+      "label": "LOCATION",
+      "precision": 0.964,
+      "recall": 0.973,
+      "f1": 0.968,
+      "support": 771
+    },
+    {
+      "test set": "test_ai4privacy",
+      "label": "ORGANIZATION",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 0
+    },
+    {
+      "test set": "test_ai4privacy",
+      "label": "PERSON",
+      "precision": 0.994,
+      "recall": 0.994,
+      "f1": 0.994,
+      "support": 2950
+    },
+    {
+      "test set": "test_ai4privacy",
+      "label": "PHONE",
+      "precision": 0.992,
+      "recall": 0.998,
+      "f1": 0.995,
+      "support": 1249
+    }
+  ]
+}

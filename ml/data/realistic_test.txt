@@ -1,0 +1,136 @@
+# Realistic, hand-checked test examples. Not generated from templates and never used for training.
+# Markup: [[value|LABEL]] = personal data to mask, {{value|kind}} = public entity to keep visible.
+# Examples are separated by a line containing only ~~~. All people, numbers and keys are fictional.
+Inbox (3) - [[meghna.rao.93@gmail.com|EMAIL]] - {{Gmail|organization}}
+~~~
+Hey [[Meghna|PERSON]], attaching the scanned form. Can you check if my PAN is right? It's [[BXRPR4417K|GOV_ID]]. Thanks, [[Adithya|PERSON]]
+~~~
+Sign in to your {{Google|organization}} Account to continue to {{YouTube|organization}}.
+~~~
+Shipping address
+[[Karan Malhotra|PERSON]]
+[[Flat 4B, Sunshine Residency, 14th Cross, Koramangala, Bengaluru 560034|ADDRESS]]
+Phone number: [[9886012345|PHONE]]
+~~~
+Your OTP for {{HDFC Bank|organization}} NetBanking is 482913. Do not share it with anyone. -{{HDFC Bank|organization}}
+~~~
+Rs.2,450.00 debited from A/c XX4521 on 21-11-26 to VPA [[swiggy.order@icici|UPI_ID]]. Not you? Call [[18002586161|PHONE]].
+~~~
+[[Sneha Kulkarni|PERSON]] · 2nd
+Senior Product Designer at {{Microsoft|organization}} | Ex-{{Flipkart|organization}} | {{IIT Bombay|organization}}
+[[Pune|LOCATION]], {{Maharashtra|region}}, {{India|country}} · 500+ connections
+~~~
+Thrilled to share that I've joined [[Kestrel Robotics|ORGANIZATION]] as their first ML engineer! Huge thanks to [[Ravi Menon|PERSON]] and [[Ankita Bose|PERSON]] for the referral. #NewBeginnings
+~~~
+Issue #2231: Crash on startup after upgrading to 4.2.0
+Reported by [[vikasdev|PERSON]] · Stack trace attached. Works on {{Linux|organization}}, fails on {{Windows|organization}} 11.
+~~~
+Hi team, my staging key leaked in the logs: [[sk-proj-Hq72LmX0vB9tN4pQ8sRwZ1kYcE6aJdUf3iGo5Tn|SECRET]]. Rotating it now, please don't reuse.
+~~~
+Order delivered! Your {{Swiggy|organization}} order from [[Meghana Foods|ORGANIZATION]] was delivered by [[Suresh|PERSON]] at 8:42 PM.
+~~~
+Dear Parent, the PTM for Class 7B is on Saturday, 6 December at 10 am. Please meet the class teacher Mrs. [[Lakshmi Narayan|PERSON]]. — [[Greenwood High School|ORGANIZATION]], [[Sarjapur Road|LOCATION]]
+~~~
+[[Arjun|PERSON]]: bro where are you
+[[Nikhil|PERSON]]: stuck near [[Silk Board|LOCATION]] 😭 20 mins
+[[Arjun|PERSON]]: ok I'll order, send me 150 on gpay
+~~~
+Name: [[MOHAMMED IRFAN SHAIKH|PERSON]]
+Father's Name: [[ABDUL RAHIM SHAIKH|PERSON]]
+Date of Birth: [[03/07/1996|DATE_OF_BIRTH]]
+Aadhaar No.: [[5821 3364 7017|GOV_ID]]
+~~~
+The {{Reserve Bank of India|organization}} kept the repo rate unchanged at 6.5% on Friday, the Governor said in [[Mumbai|LOCATION]].
+~~~
+{{Sundar Pichai|public_figure}} announced new AI features at {{Google|organization}} I/O in {{California|region}}.
+~~~
+Region: {{IN|country}} · Language: English · Currency: INR
+~~~
+Booking ID: KL7Q2X · Passenger: Ms [[Divya Iyer|PERSON]] · Seat 14C · {{IndiGo|organization}} 6E 512 · Departs 06:10
+~~~
+Rent agreement between [[Prakash Rao|PERSON]] (owner) and [[Tanvi Desai|PERSON]] (tenant) for the premises at [[No. 22, 3rd Main, HSR Layout, Bengaluru 560102|ADDRESS]], monthly rent ₹28,000.
+~~~
+Please transfer the deposit to A/c [[50100234567812|BANK_ACCOUNT]], IFSC HDFC0001234, account name [[Prakash Rao|PERSON]].
+~~~
+Your {{Amazon|organization}}.in order #403-7781234-5567701 has shipped. Arriving Thursday.
+~~~
+Reminder: Your {{Airtel|organization}} postpaid bill of ₹749 for [[98450 33221|PHONE]] is due on 28 Nov.
+~~~
+@[[priyanka_codes|PERSON]] congrats on the talk at PyCon {{India|country}}! Slides link pls 🙏
+~~~
+Meeting notes (24 Nov): [[Rohan|PERSON]] to fix the payment bug, [[Fatima|PERSON]] to update the docs, release v3.1 on Friday. Budget approved by finance.
+~~~
+Patient [[Gopal Krishnan|PERSON]], 67 y/o male, admitted to [[Sri Sai Nursing Home|ORGANIZATION]] with chest pain. Contact son [[Harish|PERSON]] on [[+91 99000 45612|PHONE]].
+~~~
+Your {{Uber|organization}} trip with [[Manjunath|PERSON]] on 22 Nov. Pickup: [[Indiranagar|LOCATION]] 100 Feet Road. Total ₹312.
+~~~
+Login alert: new sign-in to your account from [[49.207.183.11|IP_ADDRESS]] ({{Chrome|organization}} on {{Windows|organization}}). If this was you, ignore this email.
+~~~
+Applied to {{Infosys|organization}}, {{TCS|organization}} and {{Wipro|organization}} last week. Still waiting to hear back 🤞
+~~~
+Contact us: [[support@kestrelrobotics.in|EMAIL]] | [[+91 80 4567 8900|PHONE]] | Mon–Fri 9–6
+~~~
+Hi, I'm [[Ayesha|PERSON]] from [[Bloom Dental Care|ORGANIZATION]], [[Jayanagar|LOCATION]]. Confirming your appointment for tomorrow at 11:30.
+~~~
+db_password = "[[Wint3r!sComing#22|SECRET]]"
+db_host = "[[10.12.0.4|IP_ADDRESS]]"
+~~~
+Card ending 4417 was used for ₹12,999 at {{Croma|organization}}. Available limit ₹1,23,450.
+~~~
+Thanks for your donation! Receipt for [[Kavitha Subramanian|PERSON]], PAN [[AFKPS7782L|GOV_ID]], amount ₹5,000 under 80G.
+~~~
+The {{World Health Organization|organization}} warned of rising dengue cases across {{South Asia|region}}, especially in {{Kerala|region}} and {{Sri Lanka|country}}.
+~~~
+Hey! It's [[Daniel Okafor|PERSON]], we met at the {{AWS|organization}} meetup. My WhatsApp is [[+44 7700 900461|PHONE]].
+~~~
+Wire details — Beneficiary: [[Lena Fischer|PERSON]], IBAN: [[DE89 3704 0044 0532 0130 00|BANK_ACCOUNT]], Bank: {{Commerzbank|organization}}.
+~~~
+Joined {{GitHub|organization}} in 2019 · 42 repositories · [[Chennai|LOCATION]], {{India|country}}
+~~~
+Your {{Paytm|organization}} wallet received ₹500 from [[Bhavana R|PERSON]] ([[bhavana.r@paytm|UPI_ID]]).
+~~~
+Note for HR: [[Siddharth Jain|PERSON]]'s new address is [[B-702, Lodha Splendora, Thane West 400615|ADDRESS]]. Update payroll before 30 Nov.
+~~~
+Election results: {{Narendra Modi|public_figure}} thanked voters in {{Uttar Pradesh|region}} and {{Gujarat|region}}.
+~~~
+Error 403: Forbidden. Contact your administrator.
+~~~
+Passport No: [[T4582917|GOV_ID]] · Place of Issue: [[Hyderabad|LOCATION]] · Date of Expiry: 11/09/2033
+~~~
+lol [[shreya|PERSON]] u forgot ur charger at [[mahesh|PERSON]]'s place again
+~~~
+Kindly find attached the quotation for 40 units. GST extra. Valid till 15 Dec. — Sales, [[Vardhman Steel Traders|ORGANIZATION]]
+~~~
+Hello Mr. [[Thomas|PERSON]], your {{Netflix|organization}} payment failed. Update your card to keep watching.
+~~~
+Volunteer list: [[Asha Pillai|PERSON]] ([[9845011223|PHONE]]), [[Joseph D'Souza|PERSON]] ([[9845011224|PHONE]]), [[Neha Gupta|PERSON]] ([[neha.g@outlook.com|EMAIL]])
+~~~
+API_KEY=[[AIzaSyD3x9QwErTy7uIoP1aSdFgHjKl0ZxCvBnM|SECRET]]
+~~~
+The match between {{India|country}} and {{Australia|country}} will be streamed live on {{JioCinema|organization}} at 1:30 PM IST.
+~~~
+SSN: [[412-55-0198|GOV_ID]] · Employer: [[Brightline Logistics LLC|ORGANIZATION]] · State: {{Texas|region}}
+~~~
+Your parcel from {{Myntra|organization}} is out for delivery. Delivery agent: [[Ramesh|PERSON]], [[70228 13456|PHONE]].
+~~~
+Dr. [[Anil Kapoor|PERSON]] (Cardiology) is available on Mon, Wed and Fri. OPD Room 12.
+~~~
+Hiring: Data Engineer at [[Fintrail Labs|ORGANIZATION]] ([[Gurugram|LOCATION]]). Send CVs to [[careers@fintrail.io|EMAIL]].
+~~~
+Version 2.4.1 fixes the login bug on {{Android|organization}}. Thanks to everyone who reported it on {{Reddit|organization}}.
+~~~
+Account locked after 5 failed attempts from [[2401:4900:1c2a:8f1d::3|IP_ADDRESS]].
+~~~
+Mom: [[Ananya|PERSON]] did you eat?? call me back on the landline [[080-2345 6789|PHONE]]
+~~~
+Students selected for the {{ISRO|organization}} internship: [[Tejas Bhat|PERSON]], [[Mehul Sinha|PERSON]] and [[Riya Thomas|PERSON]].
+~~~
+Born on [[12 February 2001|DATE_OF_BIRTH]] in [[Kozhikode|LOCATION]], she moved to {{Canada|country}} in 2019.
+~~~
+Invoice INV-2025-0918 · Bill to: [[Harmony Interiors|ORGANIZATION]] · Due: 05 Jan 2026 · Total: ₹48,600
+~~~
+Voter ID: [[ZQT4471820|GOV_ID]] | Part No. 112 | Assembly Constituency: [[Malleshwaram|LOCATION]]
+~~~
+gh auth login --with-token <<< [[ghp_7Fk2LmQ9xR4tW8vN1pZ3yB6cH0jS5aE2uG4d|SECRET]]
+~~~
+{{UIDAI|organization}} advises citizens never to share their Aadhaar OTP over the phone.

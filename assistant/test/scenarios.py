@@ -27,6 +27,8 @@ EXT = ROOT / "assistant"
 PORT = 8771
 BASE = f"http://127.0.0.1:{PORT}"
 NEURAL = "--no-neural" not in sys.argv
+# --ner-model <hf-id or local/…>: use a fine-tuned Mintx PII model as the transformer layer
+NER_MODEL = sys.argv[sys.argv.index("--ner-model") + 1] if "--ner-model" in sys.argv else ""
 PROFILE = Path(tempfile.gettempdir()) / "mintx-scenarios-profile"
 
 results: list[tuple[str, str, bool | None, str]] = []
@@ -62,6 +64,9 @@ class Panel:
         self.content.goto(url)
         tab = self.page.evaluate("u => chrome.tabs.query({}).then(ts => ts.find(t => t.url === u).id)", self.content.url)
         s = {"policy": "balanced", "strategy": "tag", "server": BASE,
+             # no flag → the extension's default model; "--ner-model generic" → the CoNLL BERT
+             **({"nerChoice": "generic"} if NER_MODEL == "generic" else
+                {"nerChoice": "custom", "nerModelId": NER_MODEL} if NER_MODEL else {}),
              "layers": {"rules": True, "secrets": True, "nlp": True, "neural": NEURAL}}
         for k, v in settings.items():
             s["layers" if k == "layers" else k] = {**s["layers"], **v} if k == "layers" else v
@@ -255,7 +260,8 @@ def main():
         print(f"  {label}  {name.ljust(width)}  {detail if ok is not True else ''}")
     checks = [ok for *_, ok, _ in results if ok is not None]
     failed = checks.count(False)
-    print(f"\n{len(checks) - failed}/{len(checks)} checks passed" + ("" if NEURAL else " (BERT layer off)"))
+    model = f" (transformer: {NER_MODEL})" if NER_MODEL else "" if NEURAL else " (BERT layer off)"
+    print(f"\n{len(checks) - failed}/{len(checks)} checks passed{model}")
     sys.exit(1 if failed else 0)
 
 

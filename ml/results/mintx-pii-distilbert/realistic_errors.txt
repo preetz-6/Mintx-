@@ -1,0 +1,86 @@
+GOLD: Inbox (3) - [meghna.rao.93@gmail.com|EMAIL] - Gmail
+PRED: Inbox (3) - [meghna.rao.93@gmail.com|EMAIL] - [Gmail|EMAIL]
+
+GOLD: Shipping address ⏎ [Karan Malhotra|PERSON] ⏎ [Flat 4B, Sunshine Residency, 14th Cross, Koramangala, Bengaluru 560034|ADDRESS] ⏎ Phone number: [9886012345|PHONE]
+PRED: Shipping address ⏎ [Karan Malhotra ⏎ Flat 4B, Sunshine Residency, 14th Cross, Koramangala, Bengaluru 560034|ADDRESS] ⏎ Phone number: [9886012345|PHONE]
+
+GOLD: Rs.2,450.00 debited from A/c XX4521 on 21-11-26 to VPA [swiggy.order@icici|UPI_ID]. Not you? Call [18002586161|PHONE].
+PRED: Rs.2,450.00 debited from A/c [XX4521|GOV_ID] on 21-11-26 to VPA [swiggy.order@icici|UPI_ID]. Not you? Call [18002586161|PHONE].
+
+GOLD: [Sneha Kulkarni|PERSON] · 2nd ⏎ Senior Product Designer at Microsoft | Ex-Flipkart | IIT Bombay ⏎ [Pune|LOCATION], Maharashtra, India · 500+ connections
+PRED: [Sneha Kulkarni|PERSON] · 2nd ⏎ Senior Product Designer at Microsoft | Ex-Flipkart | IIT Bombay ⏎ Pune, Maharashtra, India · 500+ connections
+
+GOLD: Thrilled to share that I've joined [Kestrel Robotics|ORGANIZATION] as their first ML engineer! Huge thanks to [Ravi Menon|PERSON] and [Ankita Bose|PERSON] for the referral. #NewBeginnings
+PRED: Thrilled to share that I've joined Kestrel Robotics as their first ML engineer! [Huge|PERSON] thanks to [Ravi Menon|PERSON] and [Ankita Bose|PERSON] for the referral. #NewBeginnings
+
+GOLD: Dear Parent, the PTM for Class 7B is on Saturday, 6 December at 10 am. Please meet the class teacher Mrs. [Lakshmi Narayan|PERSON]. — [Greenwood High School|ORGANIZATION], [Sarjapur Road|LOCATION]
+PRED: Dear [Parent|PERSON], the PTM for Class 7B is on Saturday, 6 December at 10 am. Please meet the class teacher Mrs. [Lakshmi Narayan|PERSON]. — [Greenwood High School|ORGANIZATION], [Sarjapur Road|ADDRESS]
+
+GOLD: [Arjun|PERSON]: bro where are you ⏎ [Nikhil|PERSON]: stuck near [Silk Board|LOCATION] 😭 20 mins ⏎ [Arjun|PERSON]: ok I'll order, send me 150 on gpay
+PRED: [Arjun|PERSON]: bro where are you ⏎ [Nikhil|PERSON]: stuck near Silk Board 😭 20 mins ⏎ [Arjun|PERSON]: ok I'll order, send me 150 on gpay
+
+GOLD: Name: [MOHAMMED IRFAN SHAIKH|PERSON] ⏎ Father's Name: [ABDUL RAHIM SHAIKH|PERSON] ⏎ Date of Birth: [03/07/1996|DATE_OF_BIRTH] ⏎ Aadhaar No.: [5821 3364 7017|GOV_ID]
+PRED: Name: [MOHAMMED|GOV_ID] [IRFAN|GOV_ID] [SHAIKH|GOV_ID] ⏎ Father's Name: [ABDUL RAHIM SHAIKH|GOV_ID] ⏎ Date of Birth: [03/07/1996|DATE_OF_BIRTH] ⏎ Aadhaar No.: [5821 3364 7017|GOV_ID]
+
+GOLD: The Reserve Bank of India kept the repo rate unchanged at 6.5% on Friday, the Governor said in [Mumbai|LOCATION].
+PRED: The Reserve Bank of India kept the repo rate unchanged at 6.5% on Friday, the Governor said in Mumbai.
+
+GOLD: Sundar Pichai announced new AI features at Google I/O in California.
+PRED: [Sundar|PERSON] [Pichai|PERSON] announced new AI features at Google I/O in California.
+
+GOLD: Booking ID: KL7Q2X · Passenger: Ms [Divya Iyer|PERSON] · Seat 14C · IndiGo 6E 512 · Departs 06:10
+PRED: Booking ID: [KL7Q2X|GOV_ID] · Passenger: Ms [Divya Iyer|PERSON] · Seat 14C · IndiGo 6E 512 · Departs 06:10
+
+GOLD: Rent agreement between [Prakash Rao|PERSON] (owner) and [Tanvi Desai|PERSON] (tenant) for the premises at [No. 22, 3rd Main, HSR Layout, Bengaluru 560102|ADDRESS], monthly rent ₹28,000.
+PRED: Rent agreement between [Prakash Rao|PERSON] (owner) and [Tanvi Desai|PERSON] (tenant) for the premises at No. [22, 3rd Main, HSR Layout, Bengaluru 560102|ADDRESS], monthly rent ₹28,000.
+
+GOLD: Reminder: Your Airtel postpaid bill of ₹749 for [98450 33221|PHONE] is due on 28 Nov.
+PRED: Reminder: Your Airtel postpaid bill of ₹749 for [98450 33221|GOV_ID] is due on 28 Nov.
+
+GOLD: @[priyanka_codes|PERSON] congrats on the talk at PyCon India! Slides link pls 🙏
+PRED: @[priyanka|PERSON]_codes congrats on the talk at PyCon India! Slides link pls 🙏
+
+GOLD: Patient [Gopal Krishnan|PERSON], 67 y/o male, admitted to [Sri Sai Nursing Home|ORGANIZATION] with chest pain. Contact son [Harish|PERSON] on [+91 99000 45612|PHONE].
+PRED: Patient [Gopal Krishnan|PERSON], 67 y/o male, admitted to [Sri Sai|ORGANIZATION] Nursing Home with chest pain. Contact son [Harish|PERSON] on [+91 99000 45612|PHONE].
+
+GOLD: Your Uber trip with [Manjunath|PERSON] on 22 Nov. Pickup: [Indiranagar|LOCATION] 100 Feet Road. Total ₹312.
+PRED: Your Uber trip with [Manjunath|PERSON] on 22 Nov. Pickup: [Indiranagar 100 Feet Road|ADDRESS]. Total ₹312.
+
+GOLD: Applied to Infosys, TCS and Wipro last week. Still waiting to hear back 🤞
+PRED: Applied to [Infosys|ORGANIZATION], [TCS|ORGANIZATION] and [Wipro|ORGANIZATION] last week. Still waiting to hear back 🤞
+
+GOLD: Contact us: [support@kestrelrobotics.in|EMAIL] | [+91 80 4567 8900|PHONE] | Mon–Fri 9–6
+PRED: Contact us: support@[kestrelrobotics.in|EMAIL] | [+91 80 4567 8900|PHONE] | Mon–Fri 9–6
+
+GOLD: Hi, I'm [Ayesha|PERSON] from [Bloom Dental Care|ORGANIZATION], [Jayanagar|LOCATION]. Confirming your appointment for tomorrow at 11:30.
+PRED: Hi, I'm [Ayesha|PERSON] from [Bloom Dental Care,|ORGANIZATION] [Jayanagar|LOCATION]. Confirming your appointment for tomorrow at 11:30.
+
+GOLD: Joined GitHub in 2019 · 42 repositories · [Chennai|LOCATION], India
+PRED: Joined GitHub in 2019 · 42 repositories · Chennai, India
+
+GOLD: Error 403: Forbidden. Contact your administrator.
+PRED: [Error 403|PERSON]: Forbidden. Contact your administrator.
+
+GOLD: SSN: [412-55-0198|GOV_ID] · Employer: [Brightline Logistics LLC|ORGANIZATION] · State: Texas
+PRED: SSN: [412-55-0198|GOV_ID] · Employer: [Brightline Logistics|ORGANIZATION] LLC · State: Texas
+
+GOLD: Your parcel from Myntra is out for delivery. Delivery agent: [Ramesh|PERSON], [70228 13456|PHONE].
+PRED: Your parcel from [Myntra|LOCATION] is out for delivery. Delivery agent: [Ramesh|PERSON], [70228 13456|PHONE].
+
+GOLD: Dr. [Anil Kapoor|PERSON] (Cardiology) is available on Mon, Wed and Fri. OPD Room 12.
+PRED: Dr. [Anil Kapoor|PERSON] (Cardiology) is available on [Mon|ORGANIZATION], [Wed|ORGANIZATION] and Fri. OPD Room 12.
+
+GOLD: Hiring: Data Engineer at [Fintrail Labs|ORGANIZATION] ([Gurugram|LOCATION]). Send CVs to [careers@fintrail.io|EMAIL].
+PRED: [Hiring|PERSON]: Data Engineer at [Fintrail Labs|ORGANIZATION] ([Gurugram|ORGANIZATION]). Send CVs to [careers@fintrail.io|EMAIL].
+
+GOLD: Account locked after 5 failed attempts from [2401:4900:1c2a:8f1d::3|IP_ADDRESS].
+PRED: Account locked after 5 failed attempts from [2401:4900:1c2a:8f1d:|IP_ADDRESS]:3.
+
+GOLD: Students selected for the ISRO internship: [Tejas Bhat|PERSON], [Mehul Sinha|PERSON] and [Riya Thomas|PERSON].
+PRED: Students selected for the ISRO internship: [Tejas|PERSON] Bhat, [Mehul Sinha|ORGANIZATION] and [Riya Thomas|ORGANIZATION].
+
+GOLD: Invoice INV-2025-0918 · Bill to: [Harmony Interiors|ORGANIZATION] · Due: 05 Jan 2026 · Total: ₹48,600
+PRED: Invoice INV-2025-0918 · Bill to: Harmony Interiors · Due: 05 Jan 2026 · Total: ₹48,600
+
+GOLD: Voter ID: [ZQT4471820|GOV_ID] | Part No. 112 | Assembly Constituency: [Malleshwaram|LOCATION]
+PRED: Voter ID: [ZQT4471820|GOV_ID] | Part No. [112|ADDRESS] | Assembly Constituency: [Malleshwaram|LOCATION]

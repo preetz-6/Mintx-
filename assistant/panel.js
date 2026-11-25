@@ -3,6 +3,7 @@
 import { analyze, LAYERS, POLICIES, normalize } from "./pii/engine.js";
 import { Vault } from "./pii/vault.js";
 import { detectNeural } from "./pii/neural.js";
+import { NER_MODELS } from "./pii/neural-core.js";
 import { renderMarkdown } from "./markdown.js";
 
 const $ = id => document.getElementById(id);
@@ -17,11 +18,15 @@ const h = (tag, attrs = {}, ...kids) => {
 };
 
 const SEP = "\n␞\n";   // separates question / title / page so one analysis pass covers all three
-const DEFAULTS = { policy: "balanced", strategy: "tag", layers: { rules: true, secrets: true, nlp: true, neural: true },
+const DEFAULTS = { policy: "balanced", strategy: "tag", nerChoice: "custom", nerModelId: NER_MODELS.mintx.id,
+  layers: { rules: true, secrets: true, nlp: true, neural: true },
   maxChars: 8000, server: "http://127.0.0.1:8765" };
 const STEPS = [["extract", "Read page"], ...LAYERS.map(l => [l.id, l.name]), ["fusion", "Ensemble fusion"],
   ["vault", "Pseudonymize"], ["model", "Model"], ["restore", "Restore locally"]];
 const SOURCE_LABEL = { rules: "rules", secrets: "entropy", nlp: "nlp", neural: "bert", linking: "linked", propagation: "repeat" };
+// The fine-tuned model is used only once its Hugging Face id is set; otherwise the generic BERT.
+const customModel = () => settings.nerChoice === "custom" && settings.nerModelId.trim();
+const nerModel = () => customModel() || NER_MODELS.generic.id;
 const testTab = Number(new URLSearchParams(location.search).get("tab")) || null;
 
 let settings = structuredClone(DEFAULTS);
@@ -66,7 +71,8 @@ const save = () => chrome.storage.session.set({ convo: { ...convo, vault: vault.
 const scrollDown = () => $("log").scrollTo({ top: $("log").scrollHeight });
 function updatePolicyLabel() {
   const on = LAYERS.filter(l => settings.layers[l.id]).length;
-  $("policyLabel").textContent = `${settings.policy} · ${on}/${LAYERS.length} layers`;
+  SOURCE_LABEL.neural = customModel() ? "mintx-ner" : "bert";
+  $("policyLabel").textContent = `${settings.policy} · ${on}/${LAYERS.length} layers${customModel() && settings.layers.neural ? " · fine-tuned" : ""}`;
 }
 
 // --- Page access ---------------------------------------------------------------------
@@ -232,7 +238,7 @@ async function ask(question) {
 
     // 2. Detect with every enabled layer, then fuse.
     const combined = [question, page?.title || "", page ? contextOf(page) : ""].join(SEP);
-    const neural = settings.layers.neural ? text => detectNeural(text, p => card.step("neural", "running", `downloading model ${Math.round(p)}%`)) : null;
+    const neural = settings.layers.neural ? text => detectNeural(text, p => card.step("neural", "running", `downloading model ${Math.round(p)}%`), nerModel()) : null;
     const result = await analyze(combined, {
       layers: settings.layers, threshold: POLICIES[settings.policy], neural,
       onLayer: (id, state, info) => card.step(id, state, state === "done" ? `${info} candidate${info === 1 ? "" : "s"}` : state === "error" ? "unavailable" : ""),
@@ -351,6 +357,8 @@ $("openSettings").onclick = () => {
     h("span", {}, h("b", {}, l.name), h("br"), h("small", {}, l.detail)))));
   for (const r of document.querySelectorAll("input[name=policy]")) r.checked = r.value === settings.policy;
   for (const r of document.querySelectorAll("input[name=strategy]")) r.checked = r.value === settings.strategy;
+  for (const r of document.querySelectorAll("input[name=nerChoice]")) r.checked = r.value === settings.nerChoice;
+  $("nerModelId").value = settings.nerModelId;
   $("maxChars").value = settings.maxChars; $("server").value = settings.server;
   $("settings").showModal();
 };
@@ -358,6 +366,8 @@ $("settings").onclose = async () => {
   for (const c of document.querySelectorAll("input[name=layer]")) settings.layers[c.value] = c.checked;
   settings.policy = document.querySelector("input[name=policy]:checked")?.value || "balanced";
   settings.strategy = document.querySelector("input[name=strategy]:checked")?.value || "tag";
+  settings.nerChoice = document.querySelector("input[name=nerChoice]:checked")?.value || "generic";
+  settings.nerModelId = $("nerModelId").value.trim();
   settings.maxChars = Math.min(30000, Math.max(1000, +$("maxChars").value || DEFAULTS.maxChars));
   settings.server = ($("server").value || DEFAULTS.server).replace(/\/+$/, "");
   if (!convo.history.length) vault = new Vault(settings.strategy);

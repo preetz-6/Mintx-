@@ -122,5 +122,5 @@ fieldset { border: 1px solid var(--line); border-radius: 8px; margin: 0 0 10px; 
 legend { font-weight: 600; font-size: 12px; color: var(--muted); padding: 0 4px }
 .row small { color: var(--muted) }
 fieldset .row { display: flex; gap: 8px; align-items: flex-start; padding: 3px 0; background: none; grid-template: none }
-fieldset .row input[type=number], fieldset .row input[type=url] { margin-left: auto; width: 55%; font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink) }
+fieldset .row input[type=number], fieldset .row input[type=url], fieldset .row input[type=text] { margin-left: auto; width: 55%; font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--ink) }
 menu { display: flex; justify-content: flex-end; margin: 0; padding: 0 }

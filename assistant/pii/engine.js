@@ -8,7 +8,7 @@ export const LAYERS = [
   { id: "rules", name: "Rules + checksums", detail: "Regex candidates confirmed by Luhn, Verhoeff, IBAN mod-97 and context words" },
   { id: "secrets", name: "Secrets + entropy", detail: "Credential signatures and Shannon-entropy scoring for unknown keys" },
   { id: "nlp", name: "Linguistic NER", detail: "Compromise lexicon and part-of-speech rules for names, places, organizations" },
-  { id: "neural", name: "Transformer NER", detail: "BERT fine-tuned on CoNLL-2003, quantized to int8, run with ONNX Runtime WebAssembly" },
+  { id: "neural", name: "Transformer NER", detail: "Generic BERT (CoNLL-2003) or the fine-tuned Mintx PII model, int8, run with ONNX Runtime WebAssembly" },
 ];
 
 export const POLICIES = { strict: 0.35, balanced: 0.5, relaxed: 0.7 };
@@ -22,10 +22,15 @@ const VOCAB = new Set(["aadhaar", "aadhar", "pan", "upi", "iban", "ifsc", "kyc",
   "ticket", "account", "password", "visa", "mastercard", "rupay", "api", "ai", "url", "id", "pin"]);
 const NAME_STOP = new Set(["The", "And", "For", "With", "From", "Team", "Hello", "Dear", "Thanks", "Regards", "Mr", "Mrs", "Ms", "Dr"]);
 
+// Rule types are specific; the fine-tuned model uses broader ones. Same family = same thing.
+const FAMILIES = { AADHAAR: "GOV_ID", PAN: "GOV_ID", SSN: "GOV_ID", PASSPORT: "GOV_ID", IBAN: "BANK_ACCOUNT" };
+export const family = type => FAMILIES[type] || type;
+
 export function normalize(type, value) {
   const v = String(value);
   if (type === "PHONE") return `${type}:${v.replace(/\D/g, "").slice(-10)}`;
   if (["CREDIT_CARD", "AADHAAR", "SSN"].includes(type)) return `${type}:${v.replace(/\D/g, "")}`;
+  if (["GOV_ID", "PAN", "PASSPORT", "BANK_ACCOUNT", "IBAN"].includes(type)) return `${type}:${v.replace(/[\s-]/g, "").toUpperCase()}`;
   if (["EMAIL", "UPI_ID"].includes(type)) return `${type}:${v.toLowerCase()}`;
   return `${type}:${v.replace(/\s+/g, " ").trim().toLowerCase()}`;
 }
@@ -46,26 +51,34 @@ export function fuse(text, candidates) {
     else clusters.push({ start: c.start, end: c.end, items: [c] });
   }
   return clusters.map(({ items }) => {
-    const byType = new Map();
+    // Votes are pooled per type family, so the fine-tuned model's GOV_ID and the rules' AADHAAR
+    // reinforce each other instead of competing.
+    const byFamily = new Map();
     for (const c of items) {
-      const t = byType.get(c.type) || { sources: new Map(), reasons: [] };
+      const fam = family(c.type);
+      const t = byFamily.get(fam) || { sources: new Map(), reasons: [], types: new Map() };
       t.sources.set(c.source, Math.max(t.sources.get(c.source) || 0, c.score));
+      t.types.set(c.type, Math.max(t.types.get(c.type) || 0, c.score));
       t.reasons.push(...c.reasons.map(r => `${c.source}: ${r}`));
-      byType.set(c.type, t);
+      byFamily.set(fam, t);
     }
     // A confident structured type (ADDRESS, PHONE…) is more informative than a generic NER
     // label (LOCATION) for the same span, so it wins unless clearly outscored.
     const rank = (type, score) => score + (GENERIC.has(type) ? 0 : score >= 0.75 ? 0.15 : 0);
     let best;
-    for (const [type, t] of byType) {
+    for (const [fam, t] of byFamily) {
       const score = noisyOr([...t.sources.values()]);
-      if (!best || rank(type, score) > rank(best.type, best.score)) best = { type, score, sources: [...t.sources.keys()], reasons: t.reasons };
+      // Report the most specific member type (AADHAAR rather than GOV_ID) when one was seen.
+      const specific = [...t.types].filter(([type]) => type !== fam).sort((a, b) => b[1] - a[1])[0];
+      const type = specific ? specific[0] : fam;
+      if (!best || rank(type, score) > rank(best.type, best.score)) best = { type, family: fam, score, sources: [...t.sources.keys()], reasons: t.reasons };
     }
-    const others = [...byType.keys()].filter(t => t !== best.type);
+    const others = [...byFamily.keys()].filter(f => f !== best.family);
     if (others.length) best.reasons.push(`outvoted: ${others.join(", ")}`);
-    // Span: every candidate of the winning type, plus any strong candidate of another type.
+    delete best.family;
+    // Span: every candidate of the winning family, plus any strong candidate of another type.
     // Weak, outvoted guesses do not stretch the span (avoids masking whole labels).
-    const span = items.filter(c => c.type === best.type || c.score >= 0.5);
+    const span = items.filter(c => family(c.type) === family(best.type) || c.score >= 0.5);
     const s = Math.min(...span.map(c => c.start)), e = Math.max(...span.map(c => c.end));
     return { start: s, end: e, text: text.slice(s, e), ...best };
   });
