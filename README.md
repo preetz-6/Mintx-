@@ -48,15 +48,28 @@ ollama pull qwen2.5:7b          # skip if you only want dummy mode
 
 ```powershell
 # Windows
-powershell -ExecutionPolicy Bypass -File .\start.ps1              # real answers (Ollama, qwen2.5:7b)
+powershell -ExecutionPolicy Bypass -File .\start.ps1              # real answers (local Ollama, qwen2.5:7b)
 powershell -ExecutionPolicy Bypass -File .\start.ps1 -Mode dummy  # instant offline replies
 ```
 
 ```bash
 # macOS / Linux
-sh start.sh          # real answers
-sh start.sh dummy    # offline replies
+sh start.sh                  # real answers (local Ollama)
+sh start.sh llm groq --log   # Groq cloud model, with prompt log
+sh start.sh dummy            # offline replies
 ```
+
+**Using a cloud model.** The model only ever receives placeholders, so a fast cloud model is safe to use.
+
+| Provider | Setup | Start with |
+| --- | --- | --- |
+| Groq (fastest, free tier) | Free key at console.groq.com, then `$env:GROQ_API_KEY = "…"` | `.\start.ps1 -Provider groq` |
+| Ollama Cloud | Run `ollama signin` once | `.\start.ps1 -Provider ollama-cloud` |
+| OpenRouter (free models) | Key at openrouter.ai/keys, then `$env:OPENROUTER_API_KEY = "…"` | `.\start.ps1 -Provider openrouter` |
+
+Add `-Model <name>` to pick another model the provider offers.
+
+**Prompt log.** Add `-LogPrompts` to record every request in `logs/prompts.jsonl`, then open **http://127.0.0.1:8765/logs** to see exactly what the model received and replied, with placeholders highlighted. Each entry carries an automatic **leak check**: the server guard re-scans the final prompt, so the page shows how many prompts contained no raw PII. Blocked requests are logged by PII *type* only, never their text. The log stays on your machine, and `logs/` is excluded from git.
 
 **2. Load the extension** (one time).
 1. Go to `chrome://extensions` and turn on **Developer mode**.
@@ -111,11 +124,12 @@ python assistant/test/system_eval.py    # whole engine on the realistic set: rul
 | Secrets + entropy | Signatures for OpenAI, GitHub, AWS, Stripe, Slack, JWT and private keys; passwords in connection URLs and `password: …` assignments. Shannon entropy in bits per character catches unknown keys. | Statistical | `assistant/pii/secrets.js` |
 | Linguistic NER | Compromise lexicon and part-of-speech rules. Fast, with no download. | Symbolic NLP | `assistant/pii/nlp.js` |
 | Ensemble fusion | Overlapping candidates are clustered. Evidence is pooled per type family (the rules' `AADHAAR` and the model's `GOV_ID` vote together) and combined with noisy-OR, 1 − Π(1 − pᵢ), so independent detectors that agree reinforce each other. Confident specific types beat generic NER labels. A domain stoplist keeps words like "Aadhaar" from being masked. | Probabilistic | `assistant/pii/engine.js` |
+| **Learned decision** | A logistic-regression classifier decides mask or keep for each fused candidate from 38 features: layer scores, type, public-name list, text shape, position, context words, English-lexicon membership. Calibrated cut-off chosen by cross-validation, plus a safety floor so it can't veto a confident identifier. Trained on held-out predictions (stacking) ([details](ml/README.md#step-2-learned-decision-classifier)) | **Learned model, trained by us** | `assistant/pii/classifier.js`, `ml/classifier/` |
 | Entity resolution | Coreference ("Priya" → "Priya Sharma"), email-to-name inference (`vikram.nair@…` → "Vikram Nair") and propagation, which masks every repeat of a detected value | Heuristic | `assistant/pii/engine.js` |
-| Policy | Confidence threshold: strict 0.35, balanced 0.5, relaxed 0.7. Each layer can be switched off. Candidates below the threshold are listed, not hidden. | | settings ⚙ |
+| Policy | Strict / Balanced / Relaxed set the classifier's cut-off (0.075 / 0.15 / 0.5), or the fused-confidence threshold (0.35 / 0.5 / 0.7) if the learned decision is switched off. Each layer can be switched off. Candidates below the cut-off are listed, not hidden. | | settings ⚙ |
 | Pseudonymization | Reversible and consistent across a conversation: typed tags (`[EMAIL_1]`) or synthetic surrogates (`Alex Morgan`, `user1@example.com`) | | `assistant/pii/vault.js` |
 | Human in the loop | **Review before sending** shows the exact payload. **Share** reveals a value deliberately. | | `assistant/panel.js` |
-| Defense in depth | The server independently re-scans every request and rejects unmasked identifiers unless the user approved them (sent as SHA-256 hashes). No request content is logged. | | `chat.py` |
+| Defense in depth | The server independently re-scans every request and rejects unmasked identifiers unless the user approved them (sent as SHA-256 hashes). Nothing is logged unless you turn on the prompt log, which stores only placeholder text. | | `chat.py` |
 
 ## Fine-tuned PII model
 
@@ -145,10 +159,11 @@ The generic NER model was built for news: it tags *Google* and *USA* (correct fo
 | --- | ---: | ---: | ---: | ---: |
 | Rules + secrets + linguistic NER | 0.439 | 0.043 | 1.000 | 0.593 |
 | + generic BERT | 0.786 | 0.331 | 0.288 | 0.658 |
-| **+ fine-tuned model** | **0.847** | **0.082** | **0.942** | **0.837** |
+| + fine-tuned model | 0.847 | 0.082 | 0.942 | 0.837 |
+| **+ fine-tuned model + learned decision** | **0.857** | **0.071** | **0.962** | **0.847** |
 | Fine-tuned model alone | 0.765 | 0.083 | 0.942 | 0.784 |
 
-The fine-tuned model is better on every measure and faster (133 vs 220 ms per text). The rules still add value on top of it: privacy recall rises from 0.765 to 0.847 because checksums and patterns catch what the model splits or mislabels.
+The fine-tuned model is better on every measure and faster than the generic one. The learned decision classifier improves every column again; on the larger held-out-template set (650 texts) it reaches privacy recall 0.995, over-masking 0.021 and 0.954 of public names kept, against 0.992, 0.026 and 0.903 with the fixed threshold. The rules still add value on top of it: privacy recall rises from 0.765 to 0.847 because checksums and patterns catch what the model splits or mislabels.
 
 **Quantization cost.** int8 matched fp32 on the held-out templates (exact F1 0.903 vs 0.893). On the 98-value realistic set, privacy recall fell from 0.867 to 0.806, about 6 values. It runs about 2× faster on CPU and is 4× smaller.
 
@@ -203,7 +218,8 @@ This is a small synthetic benchmark. It shows how the layers interact; it does n
 ├── ml/                         dataset, training notebook, results (see ml/README.md)
 │   ├── data/                   generator, relabelling, labelling policy, realistic test set
 │   ├── train_ner.ipynb         fine-tuning → evaluation → ONNX/int8 → Hugging Face
-│   └── results/                metrics, curves, confusion matrix, error list
+│   ├── classifier/             feature export and training for the learned decision
+│   └── results/                metrics, curves, confusion matrix, error list, classifier plots
 ├── samples/                    synthetic test pages and scenario hub
 ├── server.py                   FastAPI app
 ├── chat.py                     /chat endpoint, egress guard, LLM streaming
@@ -216,9 +232,11 @@ This is a small synthetic benchmark. It shows how the layers interact; it does n
 | Variable | Default | Meaning |
 | --- | --- | --- |
 | `MINTX_MODE` | `dummy` | `llm` for real answers. The start scripts default to `llm`. |
-| `MINTX_CHAT_MODEL` | `qwen2.5:7b` | Model name at the endpoint |
-| `MINTX_ENDPOINT` | `http://127.0.0.1:11434/v1/chat/completions` | Any OpenAI-compatible chat completions URL |
-| `MINTX_API_KEY` | none | Only if the endpoint needs one |
+| `MINTX_PROVIDER` | `ollama` | `ollama`, `ollama-cloud`, `groq` or `openrouter` (sets endpoint and default model) |
+| `MINTX_CHAT_MODEL` | provider default | Model name, e.g. `qwen2.5:7b`, `llama-3.3-70b-versatile` |
+| `MINTX_ENDPOINT` | provider default | Any OpenAI-compatible chat-completions URL (overrides the provider) |
+| `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `MINTX_API_KEY` | none | Keys for the cloud providers / a custom endpoint |
+| `MINTX_LOG_PROMPTS` | `0` | `1` records prompts and replies in `logs/prompts.jsonl` (viewer at `/logs`) |
 
 In the panel's settings ⚙ you can switch layers on or off, set sensitivity, choose placeholder or surrogate replacement, cap the number of page characters sent, and change the server URL.
 
