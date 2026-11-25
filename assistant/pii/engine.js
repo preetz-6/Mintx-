@@ -3,6 +3,9 @@
 import { detectPatterns } from "./patterns.js";
 import { detectSecrets } from "./secrets.js";
 import { detectNlp } from "./nlp.js";
+import { family } from "./types.js";
+import { features, predict } from "./classifier.js";
+export { family };
 
 export const LAYERS = [
   { id: "rules", name: "Rules + checksums", detail: "Regex candidates confirmed by Luhn, Verhoeff, IBAN mod-97 and context words" },
@@ -14,6 +17,7 @@ export const LAYERS = [
 export const POLICIES = { strict: 0.35, balanced: 0.5, relaxed: 0.7 };
 const FLOOR = 0.25;           // candidates below this never form a cluster
 const GENERIC = new Set(["PERSON", "LOCATION", "ORGANIZATION"]);
+const STRUCTURED = new Set(["EMAIL", "PHONE", "GOV_ID", "CREDIT_CARD", "BANK_ACCOUNT", "UPI_ID", "IP_ADDRESS", "SECRET"]);
 const NER_SOURCES = new Set(["nlp", "neural"]);
 // Domain vocabulary that NER models often mistake for organizations: names of document
 // types and fields, not personal data. Masking them would only hide context from the model.
@@ -22,9 +26,6 @@ const VOCAB = new Set(["aadhaar", "aadhar", "pan", "upi", "iban", "ifsc", "kyc",
   "ticket", "account", "password", "visa", "mastercard", "rupay", "api", "ai", "url", "id", "pin"]);
 const NAME_STOP = new Set(["The", "And", "For", "With", "From", "Team", "Hello", "Dear", "Thanks", "Regards", "Mr", "Mrs", "Ms", "Dr"]);
 
-// Rule types are specific; the fine-tuned model uses broader ones. Same family = same thing.
-const FAMILIES = { AADHAAR: "GOV_ID", PAN: "GOV_ID", SSN: "GOV_ID", PASSPORT: "GOV_ID", IBAN: "BANK_ACCOUNT" };
-export const family = type => FAMILIES[type] || type;
 
 export function normalize(type, value) {
   const v = String(value);
@@ -80,7 +81,10 @@ export function fuse(text, candidates) {
     // Weak, outvoted guesses do not stretch the span (avoids masking whole labels).
     const span = items.filter(c => family(c.type) === family(best.type) || c.score >= 0.5);
     const s = Math.min(...span.map(c => c.start)), e = Math.max(...span.map(c => c.end));
-    return { start: s, end: e, text: text.slice(s, e), ...best };
+    // Raw evidence kept for the learned decision layer: best score per source and family count.
+    const votes = {};
+    for (const c of items) votes[c.source] = Math.max(votes[c.source] || 0, c.score);
+    return { start: s, end: e, text: text.slice(s, e), ...best, votes, families: byFamily.size };
   });
 }
 
@@ -164,9 +168,27 @@ export async function analyze(text, opts = {}) {
 
   const t0 = performance.now();
   const fused = fuse(text, candidates.filter(c => !(NER_SOURCES.has(c.source) && VOCAB.has(text.slice(c.start, c.end).toLowerCase()))));
+  // Decision: a trained classifier (when provided) or the fused confidence, against the policy threshold.
+  const classifier = opts.classifier;
+  for (const e of fused) {
+    if (!classifier && !opts.returnFeatures) continue;
+    e.features = features(text, e, opts.nlp);
+    if (classifier) {
+      e.fusedScore = e.score;
+      e.score = predict(classifier, e.features);
+      e.reasons.push(`classifier p=${e.score.toFixed(2)} (fused ${e.fusedScore.toFixed(2)})`);
+      // Safety floor: the classifier decides ambiguous cases, but cannot veto a formatted identifier
+      // (email, phone, ID, card, key…) that the deterministic layers are already sure about.
+      if (STRUCTURED.has(family(e.type)) && e.fusedScore >= (classifier.floor ?? 0.7) && e.fusedScore > e.score) {
+        e.score = e.fusedScore;
+        e.reasons.push("kept by identifier safety floor");
+      }
+    }
+  }
   const linked = link(text, fused.filter(e => e.score >= threshold));
   const entities = linked.filter(e => !allow.has(normalize(e.type, e.canonical || e.text)));
   timings.fusion = Math.round(performance.now() - t0);
   const belowThreshold = fused.filter(e => e.score < threshold);
-  return { entities, belowThreshold, kept: linked.length - entities.length, candidates: candidates.length, counts, timings, errors };
+  return { entities, belowThreshold, kept: linked.length - entities.length, candidates: candidates.length, counts, timings, errors,
+    ...(opts.returnFeatures ? { fused } : {}) };
 }
