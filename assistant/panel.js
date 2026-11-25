@@ -61,7 +61,8 @@ async function checkServer() {
     const j = await r.json();
     pill.textContent = j.mode === "dummy" ? "Dummy model" : j.model;
     pill.className = "pill ok";
-    pill.title = `Server egress guard checks: ${j.guard.join(", ")}`;
+    pill.title = [j.provider && `Provider: ${j.provider}`, `Server egress guard checks: ${j.guard.join(", ")}`,
+      j.logging && `Prompt log on: ${settings.server}/logs`].filter(Boolean).join("\n");
   } catch {
     pill.textContent = "Server offline"; pill.className = "pill bad";
     pill.title = `Start the server: python -m uvicorn server:app --port 8765 (${settings.server})`;

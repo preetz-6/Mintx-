@@ -28,5 +28,7 @@ ml/data/raw/
 ml/data/processed/
 # Local training outputs (smoke tests, checkpoints)
 ml/outputs/
+# Prompt logs (opt-in, MINTX_LOG_PROMPTS=1)
+logs/
 # Classifier training rows (rebuilt by ml/classifier/export_features.py)
 ml/classifier/features/

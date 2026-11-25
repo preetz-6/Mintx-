@@ -10,7 +10,9 @@ The browser extension detects personal data locally and replaces it with placeho
 3. forwards the sanitized conversation to an OpenAI-compatible model (Ollama by default) and
    streams the reply back. The extension restores real values on the device.
 
-No request content is logged or stored; only aggregate counters are kept in memory.
+By default no request content is logged or stored; only aggregate counters are kept in memory.
+With MINTX_LOG_PROMPTS=1 the already-pseudonymized prompt and reply are written to logs/prompts.jsonl
+(viewer at /logs) for analysis; blocked requests are logged by PII type only.
 """
 from __future__ import annotations
 
@@ -19,6 +21,9 @@ import json
 import os
 import re
 import time
+import uuid
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Iterator, Literal
 
 import httpx
@@ -117,8 +122,29 @@ Rules:
 - Be concise and practical. Use Markdown lists or short paragraphs when helpful."""
 
 
+# Providers: any OpenAI-compatible chat-completions API. The model only ever receives
+# placeholder text, so a cloud model is safe to use. Keys come from environment variables only.
+PROVIDERS = {
+    "ollama":       {"endpoint": "http://127.0.0.1:11434/v1/chat/completions", "model": "qwen2.5:7b", "key_env": None},
+    # Ollama Cloud models run through the local Ollama app after `ollama signin`.
+    "ollama-cloud": {"endpoint": "http://127.0.0.1:11434/v1/chat/completions", "model": "gpt-oss:120b-cloud", "key_env": None},
+    "groq":         {"endpoint": "https://api.groq.com/openai/v1/chat/completions", "model": "llama-3.3-70b-versatile", "key_env": "GROQ_API_KEY"},
+    "openrouter":   {"endpoint": "https://openrouter.ai/api/v1/chat/completions", "model": "meta-llama/llama-3.3-70b-instruct:free", "key_env": "OPENROUTER_API_KEY"},
+}
+
+
+def provider() -> dict:
+    name = os.getenv("MINTX_PROVIDER", "ollama")
+    base = PROVIDERS.get(name, PROVIDERS["ollama"])
+    key = os.getenv("MINTX_API_KEY") or (os.getenv(base["key_env"]) if base["key_env"] else None)
+    return {"name": name if name in PROVIDERS else "custom",
+            "endpoint": os.getenv("MINTX_ENDPOINT") or base["endpoint"],
+            "model": os.getenv("MINTX_CHAT_MODEL") or os.getenv("MINTX_MODEL") or base["model"],
+            "key": key, "needs_key": bool(base["key_env"])}
+
+
 def model_name() -> str:
-    return os.getenv("MINTX_CHAT_MODEL") or os.getenv("MINTX_MODEL") or "qwen2.5:7b"
+    return provider()["model"]
 
 
 def build_messages(req: ChatRequest) -> list[dict]:
@@ -133,13 +159,19 @@ def build_messages(req: ChatRequest) -> list[dict]:
     return messages
 
 
-def stream_model(req: ChatRequest) -> Iterator[str]:
-    body = {"model": model_name(), "temperature": 0.2, "stream": True, "messages": build_messages(req)}
-    headers = {"Authorization": "Bearer " + os.getenv("MINTX_API_KEY", "local")}
-    url = os.getenv("MINTX_ENDPOINT", "http://127.0.0.1:11434/v1/chat/completions")
+def stream_model(messages: list[dict], log: dict) -> Iterator[str]:
+    prov = provider()
+    body = {"model": prov["model"], "temperature": 0.2, "stream": True, "messages": messages}
+    headers = {"Authorization": "Bearer " + (prov["key"] or "local")}
+    if prov["needs_key"] and not prov["key"]:
+        log["status"] = "error"
+        yield f"\n\n_No API key for {prov['name']}. Set it in the environment before starting the server._"
+        return
     try:
-        with httpx.stream("POST", url, json=body, headers=headers, timeout=httpx.Timeout(300, connect=10), trust_env=False) as r:
+        with httpx.stream("POST", prov["endpoint"], json=body, headers=headers,
+                          timeout=httpx.Timeout(300, connect=10), trust_env=False) as r:
             if r.status_code != 200:
+                log["status"] = "error"; log["error"] = f"HTTP {r.status_code}"
                 yield f"\n\n_Model endpoint returned HTTP {r.status_code}._"
                 return
             for line in r.iter_lines():
@@ -155,7 +187,8 @@ def stream_model(req: ChatRequest) -> Iterator[str]:
                 if delta:
                     yield delta
     except httpx.HTTPError as e:
-        yield f"\n\n_Could not reach the model ({type(e).__name__}). Is Ollama running?_"
+        log["status"] = "error"; log["error"] = type(e).__name__
+        yield f"\n\n_Could not reach the model ({type(e).__name__}). Is the provider running and reachable?_"
 
 
 def stream_dummy(req: ChatRequest) -> Iterator[str]:
@@ -177,10 +210,46 @@ def stream_dummy(req: ChatRequest) -> Iterator[str]:
         yield word
 
 
+# --- Prompt log ---------------------------------------------------------------------------
+# Opt-in (MINTX_LOG_PROMPTS=1). Records exactly what was sent to the model and what came back.
+# Everything here is already pseudonymized; each entry also stores an automatic leak check.
+LOG_FILE = Path(os.getenv("MINTX_LOG_FILE", Path(__file__).resolve().parent / "logs" / "prompts.jsonl"))
+PLACEHOLDER = re.compile(r"\[[A-Z_]+_\d+\]")
+logging_on = lambda: os.getenv("MINTX_LOG_PROMPTS") == "1"  # noqa: E731
+
+
+def leak_check(texts: list[str], req: ChatRequest) -> list[str]:
+    """Run the egress guard again over the final prompt; returns PII kinds found (should be empty)."""
+    probe = ChatRequest(messages=[Message(role="user", content=t[:20000] or " ") for t in texts if t] or
+                        [Message(role="user", content=" ")], placeholders=req.placeholders, approved=req.approved)
+    return egress_violations(probe)
+
+
+def write_log(entry: dict):
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with LOG_FILE.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+
+
+def logged(gen: Iterator[str], entry: dict, start: float) -> Iterator[str]:
+    reply = []
+    try:
+        for chunk in gen:
+            reply.append(chunk)
+            yield chunk
+    finally:
+        entry["reply"] = "".join(reply)
+        entry["latency_ms"] = round((time.time() - start) * 1000)
+        entry["reply_placeholders"] = sorted(set(PLACEHOLDER.findall(entry["reply"])))
+        write_log(entry)
+
+
 @router.get("/health")
 def health():
     mode = os.getenv("MINTX_MODE", "dummy")
-    return {"mode": "dummy" if mode == "dummy" else "llm", "model": None if mode == "dummy" else model_name(),
+    prov = provider()
+    return {"mode": "dummy" if mode == "dummy" else "llm", "model": None if mode == "dummy" else prov["model"],
+            "provider": None if mode == "dummy" else prov["name"], "logging": logging_on(),
             "guard": [g[0] for g in GUARDS], **STATS}
 
 
@@ -190,9 +259,37 @@ def chat(req: ChatRequest):
         raise HTTPException(422, "The last message must come from the user.")
     STATS["requests"] += 1
     STATS["placeholders_seen"] += len(req.placeholders)
+    start = time.time()
+    dummy = os.getenv("MINTX_MODE", "dummy") == "dummy"
+    entry = {"id": uuid.uuid4().hex[:12], "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+             "provider": "dummy" if dummy else provider()["name"], "model": None if dummy else model_name(),
+             "site": req.page.site if req.page else None, "placeholders": len(req.placeholders), "status": "ok"}
     blocked = egress_violations(req)
     if blocked:
         STATS["blocked"] += 1
+        if logging_on():   # never store the offending text, only which kinds were caught
+            write_log({**entry, "status": "blocked", "blocked": blocked, "latency_ms": round((time.time() - start) * 1000)})
         raise HTTPException(422, {"blocked": blocked, "message": "Egress guard blocked unmasked " + ", ".join(blocked)})
-    gen = stream_dummy(req) if os.getenv("MINTX_MODE", "dummy") == "dummy" else stream_model(req)
+    messages = build_messages(req)
+    gen = stream_dummy(req) if dummy else stream_model(messages, entry)
+    if logging_on():
+        entry.update(messages=messages, chars_sent=sum(len(m["content"]) for m in messages),
+                     prompt_placeholders=sorted(set(PLACEHOLDER.findall(" ".join(m["content"] for m in messages if m["role"] != "system")))),
+                     leak_check=leak_check([m["content"] for m in messages], req))
+        gen = logged(gen, entry, start)
     return StreamingResponse(gen, media_type="text/plain; charset=utf-8", headers={"Cache-Control": "no-store"})
+
+
+@router.get("/logs/data")
+def logs_data(limit: int = 200):
+    if not LOG_FILE.exists():
+        return {"enabled": logging_on(), "entries": []}
+    lines = LOG_FILE.read_text(encoding="utf-8").splitlines()[-limit:]
+    return {"enabled": logging_on(), "entries": [json.loads(l) for l in reversed(lines) if l.strip()]}
+
+
+@router.delete("/logs/data")
+def logs_clear():
+    if LOG_FILE.exists():
+        LOG_FILE.unlink()
+    return {"cleared": True}
