@@ -3,7 +3,8 @@ run inside the real extension on the hand-checked realistic test set.
 
     python assistant/test/system_eval.py [--model Preetm-666/mintx-pii-distilbert] [--set test_realistic]
 
-Compares: rules only · rules + generic BERT · rules + fine-tuned model · fine-tuned model alone.
+Compares: rules only · + generic BERT · + fine-tuned model · + fine-tuned model and learned decision
+classifier · fine-tuned model alone.
 Needs ml/data/processed/ (python ml/data/build.py).
 """
 import json, sys, tempfile
@@ -21,12 +22,14 @@ records = [json.loads(l) for l in open(ROOT / f"ml/data/processed/{SET}.jsonl", 
 JS = """async ({ records, model }) => {
   const { analyze, family } = await import(chrome.runtime.getURL('pii/engine.js'));
   const { detectNeural } = await import(chrome.runtime.getURL('pii/neural.js'));
+  const { CLASSIFIER } = await import(chrome.runtime.getURL('pii/classifier-model.js'));
   const nlp = globalThis.nlp;
   const base = { rules: true, secrets: true, nlp: true };
   const configs = {
     'rules + secrets + linguistic NER': { layers: { ...base, neural: false } },
     '+ generic BERT (CoNLL)': { layers: { ...base, neural: true }, model: 'Xenova/bert-base-NER' },
     '+ fine-tuned Mintx model': { layers: { ...base, neural: true }, model },
+    '+ fine-tuned + learned decision': { layers: { ...base, neural: true }, model, classifier: CLASSIFIER },
     'fine-tuned Mintx model alone': { layers: { neural: true }, model },
   };
   const TYPE = t => ({ POSTAL_CODE: 'ADDRESS' }[t] || family(t));
@@ -36,7 +39,8 @@ JS = """async ({ records, model }) => {
     const t0 = performance.now();
     for (const r of records) {
       const neural = cfg.layers.neural ? t => detectNeural(t, null, cfg.model) : null;
-      const { entities } = await analyze(r.text, { layers: cfg.layers, neural, nlp });
+      const { entities } = await analyze(r.text, { layers: cfg.layers, neural, nlp, classifier: cfg.classifier,
+        threshold: cfg.classifier ? cfg.classifier.policies.balanced : 0.5 });
       const ov = (a, b) => a.start < b.end && b.start < a.end;
       for (const g of r.spans) {
         gold++;

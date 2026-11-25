@@ -1,0 +1,234 @@
+{
+  "choice": "logistic regression",
+  "policies": {
+    "strict": 0.075,
+    "balanced": 0.15,
+    "relaxed": 0.5
+  },
+  "features": [
+    "vote_rules",
+    "vote_secrets",
+    "vote_nlp",
+    "vote_neural",
+    "fused_score",
+    "n_sources",
+    "n_families",
+    "type_PERSON",
+    "type_EMAIL",
+    "type_PHONE",
+    "type_ADDRESS",
+    "type_LOCATION",
+    "type_ORGANIZATION",
+    "type_DATE_OF_BIRTH",
+    "type_GOV_ID",
+    "type_CREDIT_CARD",
+    "type_BANK_ACCOUNT",
+    "type_UPI_ID",
+    "type_IP_ADDRESS",
+    "type_SECRET",
+    "public_name",
+    "log_length",
+    "n_words",
+    "all_upper",
+    "title_case",
+    "lower_case",
+    "digit_ratio",
+    "has_at",
+    "line_start",
+    "sentence_start",
+    "colon_after",
+    "title_before",
+    "name_label_before",
+    "preposition_before",
+    "lex_common_frac",
+    "lex_name_frac",
+    "lex_unknown_frac",
+    "lex_org_or_place"
+  ],
+  "cv": {
+    "fixed rule (fused \u2265 0.5)": {
+      "roc_auc": 0.9885628418132283,
+      "pr_auc": 0.9986990130869341,
+      "precision": 0.9842511885895404,
+      "recall": 0.9988942501005227,
+      "f1": 0.9915186589503093,
+      "brier": 0.021816230192695383,
+      "public_kept": 0.9156626506024096,
+      "n": 10786
+    },
+    "logistic regression": {
+      "roc_auc": 0.994694247797377,
+      "pr_auc": 0.9993751543092152,
+      "precision": 0.9971884727382267,
+      "recall": 0.998291113791717,
+      "f1": 0.9977394886220927,
+      "brier": 0.0040527428525603225,
+      "public_kept": 0.9975903614457832,
+      "n": 10786
+    },
+    "gradient boosting": {
+      "roc_auc": 0.9947737783011037,
+      "pr_auc": 0.9985954043286445,
+      "precision": 0.9968862997187625,
+      "recall": 0.9976879774829112,
+      "f1": 0.9972869774919614,
+      "brier": 0.004528749642397345,
+      "public_kept": 0.9975903614457832,
+      "n": 10786
+    }
+  },
+  "operating_point": {
+    "fixed rule (fused \u2265 0.5) | test_synthetic": {
+      "roc_auc": 0.9740767732052292,
+      "pr_auc": 0.9973530521763011,
+      "precision": 0.9736977823620423,
+      "recall": 0.996832101372756,
+      "f1": 0.9851291416644926,
+      "brier": 0.030328543086785602,
+      "public_kept": 0.8240740740740741,
+      "n": 2036
+    },
+    "logistic regression @ 0.15 + safety floor | test_synthetic": {
+      "roc_auc": 0.9940843583146185,
+      "pr_auc": 0.9995539330576004,
+      "precision": 0.9788113695090439,
+      "recall": 1.0,
+      "f1": 0.989292243405589,
+      "brier": 0.015211657178193684,
+      "public_kept": 0.9166666666666666,
+      "n": 2036
+    },
+    "fixed rule (fused \u2265 0.5) | test_realistic": {
+      "roc_auc": 0.9202508960573477,
+      "pr_auc": 0.9560134225120215,
+      "precision": 0.9183673469387755,
+      "recall": 0.967741935483871,
+      "f1": 0.9424083769633508,
+      "brier": 0.10335158648573005,
+      "public_kept": 0.8620689655172413,
+      "n": 129
+    },
+    "logistic regression @ 0.15 + safety floor | test_realistic": {
+      "roc_auc": 0.9489247311827957,
+      "pr_auc": 0.9756156303476372,
+      "precision": 0.9285714285714286,
+      "recall": 0.978494623655914,
+      "f1": 0.9528795811518325,
+      "brier": 0.07660761261073055,
+      "public_kept": 0.896551724137931,
+      "n": 129
+    },
+    "fixed rule (fused \u2265 0.5) | test_ai4privacy": {
+      "roc_auc": 0.994380986376346,
+      "pr_auc": 0.9997038381911981,
+      "precision": 0.9862595419847329,
+      "recall": 0.9992266047950503,
+      "f1": 0.9927007299270073,
+      "brier": 0.014086295420814538,
+      "public_kept": 0.9411764705882353,
+      "n": 2716
+    },
+    "logistic regression @ 0.15 + safety floor | test_ai4privacy": {
+      "roc_auc": 0.9986852281515853,
+      "pr_auc": 0.9999331765287789,
+      "precision": 0.9965277777777778,
+      "recall": 0.9988399071925754,
+      "f1": 0.9976825028968713,
+      "brier": 0.0035943442302586656,
+      "public_kept": 0.9411764705882353,
+      "n": 2716
+    }
+  },
+  "test": {
+    "fixed rule (fused \u2265 0.5) | test_synthetic": {
+      "roc_auc": 0.9740767732052292,
+      "pr_auc": 0.9973530521763011,
+      "precision": 0.9736977823620423,
+      "recall": 0.996832101372756,
+      "f1": 0.9851291416644926,
+      "brier": 0.030328543086785602,
+      "public_kept": 0.8240740740740741,
+      "n": 2036
+    },
+    "logistic regression | test_synthetic": {
+      "roc_auc": 0.9945900322738969,
+      "pr_auc": 0.9995920900919821,
+      "precision": 0.9818181818181818,
+      "recall": 0.9978880675818373,
+      "f1": 0.9897879025923016,
+      "brier": 0.01489823612255718,
+      "public_kept": 0.9629629629629629,
+      "n": 2036
+    },
+    "gradient boosting | test_synthetic": {
+      "roc_auc": 0.9948577420170442,
+      "pr_auc": 0.9996072054420733,
+      "precision": 0.9869519832985386,
+      "recall": 0.9984160506863781,
+      "f1": 0.9926509186351706,
+      "brier": 0.011470515469817096,
+      "public_kept": 0.9722222222222222,
+      "n": 2036
+    },
+    "fixed rule (fused \u2265 0.5) | test_realistic": {
+      "roc_auc": 0.9202508960573477,
+      "pr_auc": 0.9560134225120215,
+      "precision": 0.9183673469387755,
+      "recall": 0.967741935483871,
+      "f1": 0.9424083769633508,
+      "brier": 0.10335158648573005,
+      "public_kept": 0.8620689655172413,
+      "n": 129
+    },
+    "logistic regression | test_realistic": {
+      "roc_auc": 0.9516129032258065,
+      "pr_auc": 0.976446052570527,
+      "precision": 0.945054945054945,
+      "recall": 0.9247311827956989,
+      "f1": 0.9347826086956522,
+      "brier": 0.08151194738268637,
+      "public_kept": 0.9310344827586207,
+      "n": 129
+    },
+    "gradient boosting | test_realistic": {
+      "roc_auc": 0.9674432497013142,
+      "pr_auc": 0.9860947038454912,
+      "precision": 0.9354838709677419,
+      "recall": 0.9354838709677419,
+      "f1": 0.9354838709677419,
+      "brier": 0.08031795267665834,
+      "public_kept": 0.9310344827586207,
+      "n": 129
+    },
+    "fixed rule (fused \u2265 0.5) | test_ai4privacy": {
+      "roc_auc": 0.994380986376346,
+      "pr_auc": 0.9997038381911981,
+      "precision": 0.9862595419847329,
+      "recall": 0.9992266047950503,
+      "f1": 0.9927007299270073,
+      "brier": 0.014086295420814538,
+      "public_kept": 0.9411764705882353,
+      "n": 2716
+    },
+    "logistic regression | test_ai4privacy": {
+      "roc_auc": 0.9987566184781962,
+      "pr_auc": 0.9999372173326719,
+      "precision": 0.9980657640232108,
+      "recall": 0.9976798143851509,
+      "f1": 0.9978727518855154,
+      "brier": 0.0032072878008044844,
+      "public_kept": 0.9411764705882353,
+      "n": 2716
+    },
+    "gradient boosting | test_ai4privacy": {
+      "roc_auc": 0.9989350942947232,
+      "pr_auc": 0.9999470730805546,
+      "precision": 0.9980650154798761,
+      "recall": 0.997293116782676,
+      "f1": 0.997678916827853,
+      "brier": 0.003974559665671896,
+      "public_kept": 0.9411764705882353,
+      "n": 2716
+    }
+  }
+}

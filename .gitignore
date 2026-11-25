@@ -28,3 +28,5 @@ ml/data/raw/
 ml/data/processed/
 # Local training outputs (smoke tests, checkpoints)
 ml/outputs/
+# Classifier training rows (rebuilt by ml/classifier/export_features.py)
+ml/classifier/features/
