@@ -4,6 +4,7 @@ import { analyze, LAYERS, POLICIES, normalize } from "./pii/engine.js";
 import { Vault } from "./pii/vault.js";
 import { detectNeural } from "./pii/neural.js";
 import { NER_MODELS } from "./pii/neural-core.js";
+import { CLASSIFIER } from "./pii/classifier-model.js";
 import { renderMarkdown } from "./markdown.js";
 
 const $ = id => document.getElementById(id);
@@ -18,7 +19,7 @@ const h = (tag, attrs = {}, ...kids) => {
 };
 
 const SEP = "\n␞\n";   // separates question / title / page so one analysis pass covers all three
-const DEFAULTS = { policy: "balanced", strategy: "tag", nerChoice: "custom", nerModelId: NER_MODELS.mintx.id,
+const DEFAULTS = { policy: "balanced", strategy: "tag", nerChoice: "custom", nerModelId: NER_MODELS.mintx.id, learned: true,
   layers: { rules: true, secrets: true, nlp: true, neural: true },
   maxChars: 8000, server: "http://127.0.0.1:8765" };
 const STEPS = [["extract", "Read page"], ...LAYERS.map(l => [l.id, l.name]), ["fusion", "Ensemble fusion"],
@@ -67,12 +68,20 @@ async function checkServer() {
   }
 }
 
+// Decision cut-off: the classifier's own calibrated thresholds (chosen on validation data),
+// or the fixed fused-confidence thresholds when the learned decision is switched off.
+const cutoff = (learned = settings.learned) => learned ? CLASSIFIER.policies[settings.policy] : POLICIES[settings.policy];
+function showCuts() {
+  const learned = $("learned").checked;
+  for (const el of document.querySelectorAll(".cut"))
+    el.textContent = `· mask at ${learned ? "p" : "confidence"} ≥ ${(learned ? CLASSIFIER.policies : POLICIES)[el.dataset.policy]}`;
+}
 const save = () => chrome.storage.session.set({ convo: { ...convo, vault: vault.toJSON() } });
 const scrollDown = () => $("log").scrollTo({ top: $("log").scrollHeight });
 function updatePolicyLabel() {
   const on = LAYERS.filter(l => settings.layers[l.id]).length;
   SOURCE_LABEL.neural = customModel() ? "mintx-ner" : "bert";
-  $("policyLabel").textContent = `${settings.policy} · ${on}/${LAYERS.length} layers${customModel() && settings.layers.neural ? " · fine-tuned" : ""}`;
+  $("policyLabel").textContent = `${settings.policy} · ${on}/${LAYERS.length} layers${customModel() && settings.layers.neural ? " · fine-tuned" : ""}${settings.learned ? " · learned" : ""}`;
 }
 
 // --- Page access ---------------------------------------------------------------------
@@ -240,7 +249,7 @@ async function ask(question) {
     const combined = [question, page?.title || "", page ? contextOf(page) : ""].join(SEP);
     const neural = settings.layers.neural ? text => detectNeural(text, p => card.step("neural", "running", `downloading model ${Math.round(p)}%`), nerModel()) : null;
     const result = await analyze(combined, {
-      layers: settings.layers, threshold: POLICIES[settings.policy], neural,
+      layers: settings.layers, threshold: cutoff(), neural, classifier: settings.learned ? CLASSIFIER : null,
       onLayer: (id, state, info) => card.step(id, state, state === "done" ? `${info} candidate${info === 1 ? "" : "s"}` : state === "error" ? "unavailable" : ""),
     });
     for (const [id, msg] of Object.entries(result.errors)) card.note(`${LAYERS.find(l => l.id === id).name} unavailable: ${msg}`, "warn");
@@ -356,6 +365,8 @@ $("openSettings").onclick = () => {
     h("input", { type: "checkbox", name: "layer", value: l.id, checked: settings.layers[l.id] }),
     h("span", {}, h("b", {}, l.name), h("br"), h("small", {}, l.detail)))));
   for (const r of document.querySelectorAll("input[name=policy]")) r.checked = r.value === settings.policy;
+  $("learned").checked = settings.learned; showCuts();
+  $("learned").onchange = showCuts;
   for (const r of document.querySelectorAll("input[name=strategy]")) r.checked = r.value === settings.strategy;
   for (const r of document.querySelectorAll("input[name=nerChoice]")) r.checked = r.value === settings.nerChoice;
   $("nerModelId").value = settings.nerModelId;
@@ -365,6 +376,7 @@ $("openSettings").onclick = () => {
 $("settings").onclose = async () => {
   for (const c of document.querySelectorAll("input[name=layer]")) settings.layers[c.value] = c.checked;
   settings.policy = document.querySelector("input[name=policy]:checked")?.value || "balanced";
+  settings.learned = $("learned").checked;
   settings.strategy = document.querySelector("input[name=strategy]:checked")?.value || "tag";
   settings.nerChoice = document.querySelector("input[name=nerChoice]:checked")?.value || "generic";
   settings.nerModelId = $("nerModelId").value.trim();

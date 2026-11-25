@@ -55,9 +55,10 @@
     </fieldset>
     <fieldset>
       <legend>Sensitivity</legend>
-      <label class="row"><input type="radio" name="policy" value="strict"> <span><b>Strict</b> · mask at ≥ 35% confidence</span></label>
-      <label class="row"><input type="radio" name="policy" value="balanced"> <span><b>Balanced</b> · mask at ≥ 50%</span></label>
-      <label class="row"><input type="radio" name="policy" value="relaxed"> <span><b>Relaxed</b> · mask at ≥ 70%</span></label>
+      <label class="row"><input type="checkbox" id="learned"> <span><b>Learned decision</b> · a trained classifier decides mask or keep from every layer's evidence (recommended)</span></label>
+      <label class="row"><input type="radio" name="policy" value="strict"> <span><b>Strict</b> · mask more <small class="cut" data-policy="strict"></small></span></label>
+      <label class="row"><input type="radio" name="policy" value="balanced"> <span><b>Balanced</b> <small class="cut" data-policy="balanced"></small></span></label>
+      <label class="row"><input type="radio" name="policy" value="relaxed"> <span><b>Relaxed</b> · mask less <small class="cut" data-policy="relaxed"></small></span></label>
     </fieldset>
     <fieldset>
       <legend>Replacement strategy <small>(applies to new chats)</small></legend>
